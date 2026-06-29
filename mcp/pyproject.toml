@@ -9,7 +9,7 @@ description = "DigiDox MCP Server"
 requires-python = ">=3.10"
 dependencies = [
     "mcp[cli]",
-    "pymysql",
+    "httpx",
 ]
 
 [project.scripts]
