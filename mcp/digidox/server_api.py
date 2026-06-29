@@ -1,10 +1,15 @@
 """
 DigiDox MCP Server - API 기반
 """
+import configparser
 import json
 import os
 import httpx
 from mcp.server.fastmcp import FastMCP
+
+_ini_path = os.path.join(os.path.dirname(__file__), "..", "..", "config.ini")
+_cfg = configparser.ConfigParser()
+_cfg.read(_ini_path, encoding="utf-8")
 
 mcp = FastMCP("DigiDox")
 
@@ -14,11 +19,10 @@ _session: dict = {"token": None}
 
 def get_config():
     return {
-        "api_url": os.getenv("DIGIDOX_API_URL", "https://cloud.digidox.co.kr"),
-        "user_id": os.getenv("DIGIDOX_USER_ID", ""),
-        "password": os.getenv("DIGIDOX_PASSWORD", ""),
-        # 로그인 엔드포인트는 서버 담당자와 확인 후 교체
-        "login_path": os.getenv("DIGIDOX_LOGIN_PATH", "/service/api/login.do"),
+        "api_url": _cfg.get("digidox", "base_url", fallback="https://new.digidox.co.kr"),
+        "user_id": _cfg.get("mcp", "user_id", fallback=""),
+        "password": _cfg.get("mcp", "password", fallback=""),
+        "login_path": _cfg.get("mcp", "login_path", fallback="/service/api/login.do"),
     }
 
 

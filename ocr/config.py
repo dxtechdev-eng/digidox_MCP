@@ -1,25 +1,28 @@
+import configparser
 import os
-from dotenv import load_dotenv
 
-load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+_ini_path = os.path.join(os.path.dirname(__file__), "..", "config.ini")
+_cfg = configparser.ConfigParser()
+_cfg.read(_ini_path, encoding="utf-8")
 
 # DigiDox
-DIGIDOX_AUTH_KEY = os.getenv("DIGIDOX_AUTH_KEY", "")
-DIGIDOX_BASE_URL = os.getenv("DIGIDOX_BASE_URL", "https://cloud.digidox.co.kr")
-# TODO: 운영 시 DIGIDOX_BASE_URL 통일
-DIGIDOX_INTERNAL_URL = os.getenv("DIGIDOX_INTERNAL_URL", "http://192.168.10.4:8990")
-DIGIDOX_PDF_PATH = "/service/api/onlypdf.do"
-DIGIDOX_IMAGE_PATH = "/service/doc/call/bg.do"
-DIGIDOX_FORM_PATH = "/service/api/jsonforform.do"
-DIGIDOX_SAVE_PATH = "/service/api/savedata.do"
+DIGIDOX_BASE_URL = _cfg.get("digidox", "base_url", fallback="https://new.digidox.co.kr")
+DIGIDOX_AUTH_KEY = _cfg.get("digidox", "auth_key", fallback="")
+DIGIDOX_PDF_PATH = _cfg.get("digidox", "pdf_path", fallback="/service/api/onlypdf.do")
+DIGIDOX_IMAGE_PATH = _cfg.get("digidox", "image_path", fallback="/service/doc/call/bg.do")
+DIGIDOX_FORM_PATH = _cfg.get("digidox", "form_path", fallback="/service/api/jsonforform.do")
+DIGIDOX_SAVE_PATH = _cfg.get("digidox", "save_path", fallback="/service/api/savedata.do")
 
 # Server
-SERVER_HOST = os.getenv("SERVER_HOST", "127.0.0.1")
-SERVER_PORT = int(os.getenv("SERVER_PORT", "7000"))
+SERVER_HOST = _cfg.get("server", "host", fallback="0.0.0.0")
+SERVER_PORT = _cfg.getint("server", "port", fallback=7001)
 
-# Default OCR settings (폼에서 지정 안 된 경우 fallback)
-DEFAULT_MAX_TOKENS = 4096
+# OCR
+DEFAULT_MAX_TOKENS = _cfg.getint("ocr", "default_max_tokens", fallback=4096)
 
-# Local LLM (Ollama)
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma4:26b")
+# Ollama
+OLLAMA_URL = _cfg.get("ollama", "url", fallback="http://127.0.0.1:11434")
+OLLAMA_MODEL = _cfg.get("ollama", "model", fallback="gemma4:26b")
+
+# OpenAI
+OPENAI_API_KEY = _cfg.get("openai", "api_key", fallback="")

@@ -1,6 +1,7 @@
 """
 DigiDox MCP Server
 """
+import configparser
 import json
 import os
 import pymysql
@@ -8,16 +9,20 @@ from mcp.server.fastmcp import FastMCP
 
 BLOCKED_KEYWORDS = ["INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE", "TRUNCATE", "GRANT", "REVOKE"]
 
+_ini_path = os.path.join(os.path.dirname(__file__), "..", "..", "config.ini")
+_cfg = configparser.ConfigParser()
+_cfg.read(_ini_path, encoding="utf-8")
+
 mcp = FastMCP("DigiDox")
 
 
 def get_db_config():
     return {
-        "host": os.getenv("DIGIDOX_DB_HOST", "127.0.0.1"),
-        "port": int(os.getenv("DIGIDOX_DB_PORT", "3306")),
-        "user": os.getenv("DIGIDOX_DB_USER", ""),
-        "password": os.getenv("DIGIDOX_DB_PASSWORD", ""),
-        "database": os.getenv("DIGIDOX_DB_NAME", ""),
+        "host": _cfg.get("database", "host", fallback="127.0.0.1"),
+        "port": _cfg.getint("database", "port", fallback=3306),
+        "user": _cfg.get("database", "user", fallback=""),
+        "password": _cfg.get("database", "password", fallback=""),
+        "database": _cfg.get("database", "name", fallback=""),
         "charset": "utf8mb4",
     }
 

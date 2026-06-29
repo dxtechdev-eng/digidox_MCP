@@ -1,0 +1,33 @@
+[digidox]
+base_url = https://new.digidox.co.kr
+pdf_path = /service/api/onlypdf.do
+image_path = /service/doc/call/bg.do
+form_path = /service/api/jsonforform.do
+save_path = /service/api/savedata.do
+auth_key =
+
+[server]
+host = 0.0.0.0
+port = 7001
+
+[ocr]
+default_max_tokens = 4096
+
+[ollama]
+url = http://127.0.0.1:11434
+model = gemma4:26b
+
+[openai]
+api_key =
+
+[database]
+host = 127.0.0.1
+port = 3306
+user =
+password =
+name =
+
+[mcp]
+login_path = /service/api/login.do
+user_id =
+password =
