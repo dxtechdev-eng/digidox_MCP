@@ -61,7 +61,7 @@ def download_pdf(seq: str) -> bytes:
 
 
 def get_form_info(formid: str) -> dict:
-    url = f"{config.DIGIDOX_INTERNAL_URL}{config.DIGIDOX_FORM_PATH}"
+    url = f"{config.DIGIDOX_BASE_URL}{config.DIGIDOX_FORM_PATH}"
     response = httpx.post(url, data={"authKey": config.DIGIDOX_AUTH_KEY, "id": formid}, timeout=30)
     response.raise_for_status()
     data = response.json()
@@ -90,7 +90,7 @@ def save_ocr_result(seq: str, ocr_data: dict, form_info: dict) -> bool:
         "pages": save_pages,
     }
 
-    url = f"{config.DIGIDOX_INTERNAL_URL}{config.DIGIDOX_SAVE_PATH}"
+    url = f"{config.DIGIDOX_BASE_URL}{config.DIGIDOX_SAVE_PATH}"
     response = httpx.post(url, data={
         "authKey": config.DIGIDOX_AUTH_KEY,
         "seq": seq,
@@ -286,6 +286,36 @@ async def get_fields(formid: str, page: int = 1):
                 }
         return {"resultCode": "200", "fields": {}, "formWidth": 700, "formHeight": 990}
     except Exception as e:
+        return {"resultCode": "500", "resultMsg": str(e)}
+
+
+@app.post("/api/generate-prompt")
+async def generate_prompt(request: Request):
+    """폼 정보를 기반으로 OCR 프롬프트를 자동 생성"""
+    body = await request.json()
+    formid = body.get("formid")
+    lang = body.get("lang", "en")
+    logger.info(f"프롬프트 생성 요청: formid={formid}, lang={lang}")
+
+    if not formid:
+        return {"resultCode": "400", "resultMsg": "formid is required"}
+
+    try:
+        form_info = get_form_info(formid)
+        if form_info.get("code") != "200":
+            return {"resultCode": "404", "resultMsg": f"Form not found: {formid}"}
+
+        fields_by_page = extract_fields_by_page(form_info)
+        if not fields_by_page:
+            return {"resultCode": "404", "resultMsg": "No fields found in form"}
+
+        prompts = {}
+        for page_no, sorted_fields in fields_by_page.items():
+            prompts[str(page_no)] = build_auto_prompt(sorted_fields, lang, formid)
+
+        return {"resultCode": "200", "promptInfo": prompts}
+    except Exception as e:
+        logger.error(f"프롬프트 생성 실패: {e}")
         return {"resultCode": "500", "resultMsg": str(e)}
 
 
