@@ -302,7 +302,7 @@ async def generate_prompt(request: Request):
 
     try:
         form_info = get_form_info(formid)
-        if form_info.get("code") != "200":
+        if form_info.get("code") not in ("100", "200"):
             return {"resultCode": "404", "resultMsg": f"Form not found: {formid}"}
 
         fields_by_page = extract_fields_by_page(form_info)
