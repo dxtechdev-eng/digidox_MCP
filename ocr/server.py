@@ -309,11 +309,11 @@ async def generate_prompt(request: Request):
         if not fields_by_page:
             return {"resultCode": "404", "resultMsg": "No fields found in form"}
 
-        prompts = {}
-        for page_no, sorted_fields in fields_by_page.items():
-            prompts[str(page_no)] = build_auto_prompt(sorted_fields, lang, formid)
+        prompt_parts = []
+        for page_no, sorted_fields in sorted(fields_by_page.items()):
+            prompt_parts.append(build_auto_prompt(sorted_fields, lang, formid))
 
-        return {"resultCode": "200", "promptInfo": prompts}
+        return {"resultCode": "200", "promptInfo": "\n".join(prompt_parts)}
     except Exception as e:
         logger.error(f"프롬프트 생성 실패: {e}")
         return {"resultCode": "500", "resultMsg": str(e)}
