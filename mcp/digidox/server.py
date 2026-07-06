@@ -104,8 +104,19 @@ def query(sql: str) -> str:
     # 권한 필터 주입
     from digidox.auth import get_current_user, get_permissions
     user_id = get_current_user()
-    if user_id:
-        perm = get_permissions(user_id)
+    perm = get_permissions(user_id) if user_id else {}
+
+    # 비admin 사용자: doc, form 테이블만 조회 허용
+    if perm and perm.get("level", 0) < 100:
+        ALLOWED_TABLES = {"doc", "form", "docfield", "formfield", "docpage", "formpage"}
+        # FROM/JOIN 뒤의 테이블명 추출
+        import re
+        referenced = set(re.findall(r'\b(?:FROM|JOIN)\s+(\w+)', upper))
+        blocked_tables = referenced - ALLOWED_TABLES
+        if blocked_tables:
+            return json.dumps({"error": f"접근 권한이 없는 테이블: {', '.join(blocked_tables)}"}, ensure_ascii=False)
+
+    if user_id and perm:
         stripped = _inject_permission_filter(stripped, perm)
 
     conn = get_db()
