@@ -84,7 +84,7 @@ def main():
     import uvicorn
     host = _cfg.get("mcp", "host", fallback="0.0.0.0")
     port = _cfg.getint("mcp", "port", fallback=8080)
-    app = mcp.streamable_http_app()
+    app = mcp.streamable_http_app(host_validation=False)
     uvicorn.run(app, host=host, port=port)
 
 
