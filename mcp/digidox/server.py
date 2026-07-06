@@ -81,9 +81,11 @@ def query(sql: str) -> str:
 
 
 def main():
+    import uvicorn
     host = _cfg.get("mcp", "host", fallback="0.0.0.0")
     port = _cfg.getint("mcp", "port", fallback=8080)
-    mcp.run(transport="streamable-http", host=host, port=port)
+    app = mcp.streamable_http_app()
+    uvicorn.run(app, host=host, port=port)
 
 
 if __name__ == "__main__":
