@@ -1,5 +1,5 @@
 """
-MCP 인증 미들웨어 — JWT 기반
+MCP 인증 미들웨어 — JWT 기반 + 권한 캐싱
 """
 import configparser
 import os
@@ -19,6 +19,9 @@ _cfg.read(_ini_path, encoding="utf-8")
 JWT_SECRET = _cfg.get("auth", "jwt_secret", fallback="change-me-in-production")
 JWT_EXPIRE_HOURS = _cfg.getint("auth", "jwt_expire_hours", fallback=24)
 
+# 사용자별 권한 캐시: { user_id: { memberSeq, level, groupSeq, allowed_formSeqs, allowed_docSeqs } }
+_permission_cache = {}
+
 
 def _get_db():
     return pymysql.connect(
@@ -32,8 +35,96 @@ def _get_db():
     )
 
 
+def load_permissions(user_id: str) -> dict:
+    """사용자의 권한 정보를 DB에서 조회하여 캐싱"""
+    conn = _get_db()
+    try:
+        cursor = conn.cursor()
+
+        # 1. memberSeq, level 조회
+        cursor.execute("SELECT seq, level FROM member WHERE id = %s AND status = 1", (user_id,))
+        member = cursor.fetchone()
+        if not member:
+            return {}
+
+        member_seq = member["seq"]
+        level = member["level"]
+
+        # admin/master (level >= 100): 전체 접근
+        if level >= 100:
+            perm = {
+                "memberSeq": member_seq,
+                "level": level,
+                "groupSeq": None,
+                "allowed_formSeqs": None,  # None = 전체
+                "allowed_docSeqs": None,   # None = 전체
+            }
+            _permission_cache[user_id] = perm
+            return perm
+
+        # 2. 소속 그룹 조회
+        cursor.execute("SELECT groupSeq FROM ongroupmember WHERE memberSeq = %s", (member_seq,))
+        group_row = cursor.fetchone()
+        group_seq = group_row["groupSeq"] if group_row else None
+
+        # 3. 허용 폼 목록
+        allowed_form_seqs = set()
+        if group_seq:
+            cursor.execute("SELECT formSeq FROM ongroupform WHERE groupSeq = %s", (group_seq,))
+            allowed_form_seqs = {r["formSeq"] for r in cursor.fetchall()}
+
+        # 4. 허용 문서 목록
+        allowed_doc_seqs = set()
+        if group_seq:
+            if level == 0:
+                # 외부 사용자: doOpen=1인 문서만
+                cursor.execute("""
+                    SELECT d.seq FROM doc d
+                    JOIN addondoc a ON a.docSeq = d.seq
+                    JOIN ongroupmember gm ON a.memberSeq = gm.memberSeq
+                    WHERE gm.groupSeq = %s AND a.doOpen = 1 AND d.status > 0
+                """, (group_seq,))
+            else:
+                # 일반 사용자 (level 50): 그룹 내 모든 문서
+                cursor.execute("""
+                    SELECT d.seq FROM doc d
+                    JOIN addondoc a ON a.docSeq = d.seq
+                    JOIN ongroupmember gm ON a.memberSeq = gm.memberSeq
+                    WHERE gm.groupSeq = %s AND d.status > 0
+                """, (group_seq,))
+            allowed_doc_seqs = {r["seq"] for r in cursor.fetchall()}
+
+        perm = {
+            "memberSeq": member_seq,
+            "level": level,
+            "groupSeq": group_seq,
+            "allowed_formSeqs": allowed_form_seqs,
+            "allowed_docSeqs": allowed_doc_seqs,
+        }
+        _permission_cache[user_id] = perm
+        return perm
+
+    finally:
+        conn.close()
+
+
+def get_permissions(user_id: str) -> dict:
+    """캐시에서 권한 조회. 없으면 DB에서 로드."""
+    if user_id not in _permission_cache:
+        load_permissions(user_id)
+    return _permission_cache.get(user_id, {})
+
+
+def clear_permission_cache(user_id: str = None):
+    """권한 캐시 초기화"""
+    if user_id:
+        _permission_cache.pop(user_id, None)
+    else:
+        _permission_cache.clear()
+
+
 async def login(request: Request):
-    """POST /auth/login — ID/PW 검증 후 JWT 발급"""
+    """POST /auth/login — ID/PW 검증 후 JWT 발급 + 권한 캐싱"""
     try:
         body = await request.json()
     except Exception:
@@ -68,6 +159,9 @@ async def login(request: Request):
     if not bcrypt.checkpw(password.encode("utf-8"), hash_to_check.encode("utf-8")):
         return JSONResponse({"error": "Invalid credentials"}, status_code=401)
 
+    # 권한 캐싱
+    load_permissions(user_id)
+
     # JWT 발급
     payload = {
         "sub": user_id,
@@ -97,7 +191,6 @@ def verify_token(token: str) -> dict | None:
 class AuthMiddleware:
     """MCP 요청 전 JWT 검증 미들웨어"""
 
-    # 인증 없이 접근 가능한 경로
     EXEMPT_PATHS = {"/auth/login"}
 
     def __init__(self, app):
@@ -110,12 +203,10 @@ class AuthMiddleware:
 
         path = scope.get("path", "")
 
-        # 인증 제외 경로
         if path in self.EXEMPT_PATHS:
             await self.app(scope, receive, send)
             return
 
-        # Authorization 헤더 확인
         headers = dict(scope.get("headers", []))
         auth_header = headers.get(b"authorization", b"").decode("utf-8")
 
@@ -132,12 +223,10 @@ class AuthMiddleware:
             await response(scope, receive, send)
             return
 
-        # 인증 정보를 scope에 저장
         scope["auth"] = payload
+
+        # contextvars에 현재 사용자 설정 (MCP 도구에서 접근용)
+        from digidox.server import current_user
+        current_user.set(payload.get("sub"))
+
         await self.app(scope, receive, send)
-
-
-# 로그인 라우트
-auth_routes = [
-    Route("/auth/login", login, methods=["POST"]),
-]
