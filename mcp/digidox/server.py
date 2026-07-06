@@ -108,10 +108,10 @@ def query(sql: str) -> str:
 
     # 비admin 사용자: doc, form 테이블만 조회 허용
     if perm and perm.get("level", 0) < 100:
-        ALLOWED_TABLES = {"doc", "form", "docfield", "formfield", "docpage", "formpage"}
+        ALLOWED_TABLES = {"DOC", "FORM", "DOCFIELD", "FORMFIELD", "DOCPAGE", "FORMPAGE"}
         # FROM/JOIN 뒤의 테이블명 추출
         import re
-        referenced = set(re.findall(r'\b(?:FROM|JOIN)\s+(\w+)', upper))
+        referenced = {t.upper() for t in re.findall(r'\b(?:FROM|JOIN)\s+(\w+)', upper)}
         blocked_tables = referenced - ALLOWED_TABLES
         if blocked_tables:
             return json.dumps({"error": f"접근 권한이 없는 테이블: {', '.join(blocked_tables)}"}, ensure_ascii=False)
