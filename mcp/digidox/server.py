@@ -82,9 +82,12 @@ def query(sql: str) -> str:
 
 def main():
     import uvicorn
+    from starlette.middleware import Middleware
+    from starlette.middleware.trustedhost import TrustedHostMiddleware
     host = _cfg.get("mcp", "host", fallback="0.0.0.0")
     port = _cfg.getint("mcp", "port", fallback=8080)
-    app = mcp.streamable_http_app(host_validation=False)
+    app = mcp.streamable_http_app()
+    app.allowed_hosts = ["*"]
     uvicorn.run(app, host=host, port=port)
 
 
