@@ -107,6 +107,8 @@ def query(sql: str) -> str:
 
     # 권한 필터 주입
     user_id = current_user.get()
+    import logging
+    logging.getLogger(__name__).info(f"[PERM] user_id={user_id}, sql_before={stripped[:100]}")
     if user_id:
         from digidox.auth import get_permissions
         perm = get_permissions(user_id)
