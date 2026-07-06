@@ -82,19 +82,18 @@ def query(sql: str) -> str:
 
 def main():
     import uvicorn
-    from starlette.routing import Mount
-    from starlette.applications import Starlette
-    from digidox.auth import AuthMiddleware, auth_routes
+    from starlette.routing import Route
+    from digidox.auth import AuthMiddleware, login
 
     host = _cfg.get("mcp", "host", fallback="0.0.0.0")
     port = _cfg.getint("mcp", "port", fallback=8080)
 
-    mcp_app = mcp.streamable_http_app()
+    app = mcp.streamable_http_app()
 
-    # auth 라우트 + MCP 앱을 합친 래퍼
-    app = Starlette(
-        routes=auth_routes + [Mount("/", app=mcp_app)],
-    )
+    # 로그인 라우트 추가
+    app.routes.insert(0, Route("/auth/login", login, methods=["POST"]))
+
+    # 인증 미들웨어 적용
     app.add_middleware(AuthMiddleware)
 
     uvicorn.run(app, host=host, port=port)
