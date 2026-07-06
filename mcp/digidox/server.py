@@ -13,7 +13,7 @@ _ini_path = os.path.join(os.path.dirname(__file__), "..", "..", "config.ini")
 _cfg = configparser.ConfigParser()
 _cfg.read(_ini_path, encoding="utf-8")
 
-mcp = FastMCP("DigiDox")
+mcp = FastMCP("DigiDox", transport_security={"enable_dns_rebinding_protection": False})
 
 
 def get_db_config():
@@ -82,12 +82,9 @@ def query(sql: str) -> str:
 
 def main():
     import uvicorn
-    from starlette.middleware import Middleware
-    from starlette.middleware.trustedhost import TrustedHostMiddleware
     host = _cfg.get("mcp", "host", fallback="0.0.0.0")
     port = _cfg.getint("mcp", "port", fallback=8080)
     app = mcp.streamable_http_app()
-    app.allowed_hosts = ["*"]
     uvicorn.run(app, host=host, port=port)
 
 
