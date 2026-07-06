@@ -6,3 +6,6 @@ python-multipart
 pymupdf
 httpx
 Pillow
+pymysql
+bcrypt
+pyjwt

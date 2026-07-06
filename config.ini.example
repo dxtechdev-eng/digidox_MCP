@@ -27,6 +27,10 @@ user =
 password =
 name =
 
+[auth]
+jwt_secret = change-me-in-production
+jwt_expire_hours = 24
+
 [mcp]
 host = 0.0.0.0
 port = 8080
