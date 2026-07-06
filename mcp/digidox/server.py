@@ -2,16 +2,12 @@
 DigiDox MCP Server
 """
 import configparser
-import contextvars
 import json
 import os
 import pymysql
 from mcp.server.fastmcp import FastMCP
 
 BLOCKED_KEYWORDS = ["INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE", "TRUNCATE", "GRANT", "REVOKE"]
-
-# 현재 요청의 사용자 ID (미들웨어에서 설정)
-current_user = contextvars.ContextVar("current_user", default=None)
 
 _ini_path = os.path.join(os.path.dirname(__file__), "..", "..", "config.ini")
 _cfg = configparser.ConfigParser()
@@ -106,11 +102,9 @@ def query(sql: str) -> str:
             return json.dumps({"error": f"{blocked} 키워드가 포함된 쿼리는 실행할 수 없습니다."}, ensure_ascii=False)
 
     # 권한 필터 주입
-    user_id = current_user.get()
-    import logging
-    logging.getLogger(__name__).info(f"[PERM] user_id={user_id}, sql_before={stripped[:100]}")
+    from digidox.auth import get_current_user, get_permissions
+    user_id = get_current_user()
     if user_id:
-        from digidox.auth import get_permissions
         perm = get_permissions(user_id)
         stripped = _inject_permission_filter(stripped, perm)
 

@@ -22,6 +22,9 @@ JWT_EXPIRE_HOURS = _cfg.getint("auth", "jwt_expire_hours", fallback=24)
 # 사용자별 권한 캐시: { user_id: { memberSeq, level, groupSeq, allowed_formSeqs, allowed_docSeqs } }
 _permission_cache = {}
 
+# 현재 요청의 사용자 ID (미들웨어에서 설정, 도구 함수에서 참조)
+_current_user_id = None
+
 
 def _get_db():
     return pymysql.connect(
@@ -106,6 +109,11 @@ def load_permissions(user_id: str) -> dict:
 
     finally:
         conn.close()
+
+
+def get_current_user() -> str | None:
+    """현재 요청의 사용자 ID 반환"""
+    return _current_user_id
 
 
 def get_permissions(user_id: str) -> dict:
@@ -225,8 +233,8 @@ class AuthMiddleware:
 
         scope["auth"] = payload
 
-        # contextvars에 현재 사용자 설정 (MCP 도구에서 접근용)
-        from digidox.server import current_user
-        current_user.set(payload.get("sub"))
+        # 전역 변수에 현재 사용자 설정 (MCP 도구에서 접근용)
+        global _current_user_id
+        _current_user_id = payload.get("sub")
 
         await self.app(scope, receive, send)
