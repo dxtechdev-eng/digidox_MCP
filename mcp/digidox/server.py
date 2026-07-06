@@ -81,7 +81,9 @@ def query(sql: str) -> str:
 
 
 def main():
-    mcp.run(transport="stdio")
+    host = _cfg.get("mcp", "host", fallback="0.0.0.0")
+    port = _cfg.getint("mcp", "port", fallback=8080)
+    mcp.run(transport="streamable-http", host=host, port=port)
 
 
 if __name__ == "__main__":

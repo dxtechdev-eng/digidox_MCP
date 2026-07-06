@@ -28,6 +28,8 @@ password =
 name =
 
 [mcp]
+host = 0.0.0.0
+port = 8080
 login_path = /service/api/login.do
 user_id =
 password =
