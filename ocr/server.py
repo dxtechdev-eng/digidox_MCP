@@ -528,7 +528,7 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
             ocr_text = run_ocr_engine(images, prompt, engine, api_url, api_key, model)
 
         elapsed = round(time.time() - ocr_start_time, 2)
-        logger.info(f"[OCR 완료] seq={seq}, 소요시간={elapsed}초, 시각={time.strftime('%Y-%m-%d %H:%M:%S')}\n--- OCR 결과 ---\n{ocr_text[:500]}\n--- 끝 ---")
+        logger.info(f"[OCR 완료] seq={seq}, 소요시간={elapsed}초, 시각={time.strftime('%Y-%m-%d %H:%M:%S')}\n--- OCR 결과 ---\n{ocr_text}\n--- 끝 ---")
 
         ocr_cache[seq] = {"pages": page_count, "ocrResult": ocr_text}
 
