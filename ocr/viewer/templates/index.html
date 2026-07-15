@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <title>AI OCR Viewer</title>
+    <link rel="stylesheet" href="/viewer/static/css/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>AI OCR Viewer</h1>
+        <div class="header-info">
+            <span id="docInfo"></span>
+            <div class="header-actions">
+                <button id="rerunBtn" onclick="rerunOcr()">Re-Scan</button>
+                <button onclick="clearOverlays()">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="viewer-wrapper">
+        <div class="viewer-container" id="viewerContainer">
+            <img id="docImage" src="" alt="Document" />
+            <div id="overlayLayer"></div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-box">
+            <div class="spinner"></div>
+            <p>OCR Processing...</p>
+        </div>
+    </div>
+
+    <script src="/viewer/static/js/app.js"></script>
+</body>
+</html>

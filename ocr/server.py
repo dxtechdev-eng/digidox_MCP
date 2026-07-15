@@ -37,6 +37,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 뷰어 정적 파일
+VIEWER_DIR = os.path.join(os.path.dirname(__file__), "viewer")
+if os.path.exists(os.path.join(VIEWER_DIR, "static")):
+    app.mount("/viewer/static", StaticFiles(directory=os.path.join(VIEWER_DIR, "static")), name="viewer_static")
+
 # 모든 요청 로깅
 @app.middleware("http")
 async def log_all_requests(request: Request, call_next):
@@ -264,7 +269,16 @@ Images correspond to {json.dumps(batch_ids)} in order.
 # ============================================================
 
 @app.get("/api/image")
-async def get_image(seq: str, idx: int = 1):
+async def get_image(seq: str = None, idx: int = 1, key: str = None):
+    if key and not seq:
+        try:
+            decoded = base64.b64decode(key).decode("utf-8")
+            params = parse_qs(decoded)
+            seq = params.get("seq", [None])[0]
+        except Exception:
+            pass
+    if not seq:
+        return Response(content="seq is required", status_code=400)
     url = f"{config.DIGIDOX_BASE_URL}{config.DIGIDOX_IMAGE_PATH}"
     response = httpx.get(url, params={"docSeq": seq, "idx": idx}, timeout=30)
     response.raise_for_status()
@@ -388,7 +402,20 @@ async def local_ocr(seq: str, formid: str = None):
 
 
 @app.get("/api/ocr")
-async def api_ocr(seq: str, formid: str = None, force: bool = False):
+async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key: str = None):
+    # base64 key 디코딩
+    if key and not seq:
+        try:
+            decoded = base64.b64decode(key).decode("utf-8")
+            params = parse_qs(decoded)
+            seq = params.get("seq", [None])[0]
+            formid = formid or params.get("formid", [None])[0]
+        except Exception as e:
+            logger.error(f"key 디코딩 실패: {e}")
+
+    if not seq:
+        return {"resultCode": "400", "resultMsg": "seq is required"}
+
     logger.info(f"OCR 요청: seq={seq}, formid={formid}, force={force}")
 
     if not force and seq in ocr_cache:
@@ -561,6 +588,16 @@ async def save_ocr(request: Request):
     except Exception as e:
         logger.error(f"저장 실패: {e}", exc_info=True)
         return {"resultCode": "500", "resultMsg": str(e)}
+
+
+@app.get("/", response_class=HTMLResponse)
+async def viewer(request: Request):
+    """범용 OCR 오버레이 뷰어"""
+    template_path = os.path.join(VIEWER_DIR, "templates", "index.html")
+    if os.path.exists(template_path):
+        with open(template_path, encoding="utf-8") as f:
+            return HTMLResponse(f.read())
+    return HTMLResponse("<h1>Viewer template not found</h1>", status_code=404)
 
 
 @app.get("/health")
