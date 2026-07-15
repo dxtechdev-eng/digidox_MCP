@@ -602,6 +602,59 @@ async def save_ocr(request: Request):
         return {"resultCode": "500", "resultMsg": str(e)}
 
 
+@app.post("/v1/images:annotate")
+async def vision_annotate(request: Request):
+    """Google Vision API 호환 엔드포인트 — 내부적으로 Ollama OCR 사용"""
+    import time
+    start_time = time.time()
+
+    try:
+        body = await request.json()
+    except Exception:
+        return {"responses": []}
+
+    requests_list = body.get("requests", [])
+    logger.info(f"[Vision API] 요청 수신: {len(requests_list)}개 이미지")
+
+    responses = []
+    for i, req in enumerate(requests_list):
+        image_content = req.get("image", {}).get("content", "")
+        if not image_content:
+            responses.append({})
+            continue
+
+        prompt = "Read the handwritten text in this image. Return only the recognized text. If the image is empty or has no handwritten text, return nothing."
+
+        try:
+            text = ocr_with_ollama([image_content], prompt, config.OLLAMA_URL, config.OLLAMA_MODEL)
+            text = text.strip()
+            logger.info(f"[Vision API] 이미지 {i}: '{text}'")
+
+            if text:
+                responses.append({
+                    "fullTextAnnotation": {
+                        "text": text,
+                        "pages": []
+                    },
+                    "textAnnotations": [
+                        {
+                            "description": text,
+                            "boundingPoly": {"vertices": []}
+                        }
+                    ]
+                })
+            else:
+                responses.append({})
+        except Exception as e:
+            logger.error(f"[Vision API] 이미지 {i} OCR 실패: {e}")
+            responses.append({})
+
+    elapsed = round(time.time() - start_time, 2)
+    logger.info(f"[Vision API] 완료: {len(responses)}개 응답, 소요시간={elapsed}초")
+
+    return {"responses": responses}
+
+
 @app.get("/", response_class=HTMLResponse)
 async def viewer(request: Request):
     """범용 OCR 오버레이 뷰어"""
