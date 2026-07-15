@@ -416,7 +416,9 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
     if not seq:
         return {"resultCode": "400", "resultMsg": "seq is required"}
 
-    logger.info(f"OCR 요청: seq={seq}, formid={formid}, force={force}")
+    import time
+    ocr_start_time = time.time()
+    logger.info(f"[OCR 시작] seq={seq}, formid={formid}, force={force}, 시각={time.strftime('%Y-%m-%d %H:%M:%S')}")
 
     if not force and seq in ocr_cache:
         logger.info(f"캐시 반환: seq={seq}")
@@ -525,7 +527,8 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
 
             ocr_text = run_ocr_engine(images, prompt, engine, api_url, api_key, model)
 
-        logger.info(f"OCR 완료\n--- OCR 결과 ---\n{ocr_text[:500]}\n--- 끝 ---")
+        elapsed = round(time.time() - ocr_start_time, 2)
+        logger.info(f"[OCR 완료] seq={seq}, 소요시간={elapsed}초, 시각={time.strftime('%Y-%m-%d %H:%M:%S')}\n--- OCR 결과 ---\n{ocr_text[:500]}\n--- 끝 ---")
 
         ocr_cache[seq] = {"pages": page_count, "ocrResult": ocr_text}
 
@@ -536,16 +539,19 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
             "formid": formid,
             "pages": page_count,
             "ocrResult": ocr_text,
+            "elapsed": elapsed,
         }
 
     except Exception as e:
-        logger.error(f"OCR 실패: {e}", exc_info=True)
+        elapsed = round(time.time() - ocr_start_time, 2)
+        logger.error(f"[OCR 실패] seq={seq}, 소요시간={elapsed}초, 에러: {e}", exc_info=True)
         return {
             "resultCode": "500",
             "resultMsg": str(e),
             "seq": seq,
             "formid": formid,
             "ocrResult": None,
+            "elapsed": elapsed,
         }
 
 
