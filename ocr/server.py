@@ -446,10 +446,16 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
             except Exception as e:
                 logger.warning(f"폼 정보 조회 실패: {e}")
 
-        engine = ocr_settings.get("engine", "openai")
-        api_url = ocr_settings.get("api_url", "https://api.openai.com")
-        api_key = ocr_settings.get("api_key", "")
-        model = ocr_settings.get("model", "gpt-4o")
+        # engine = ocr_settings.get("engine", "openai")
+        # api_url = ocr_settings.get("api_url", "https://api.openai.com")
+        # api_key = ocr_settings.get("api_key", "")
+        # model = ocr_settings.get("model", "gpt-4o")
+
+        # 로컬 LLM 테스트용 — Ollama 기본 엔진
+        engine = "ollama"
+        api_url = config.OLLAMA_URL
+        api_key = ""
+        model = config.OLLAMA_MODEL
 
         # 2. PDF 다운로드
         logger.info(f"PDF 다운로드 중... seq={seq}")
