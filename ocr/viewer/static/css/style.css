@@ -65,7 +65,7 @@ body {
     position: absolute;
     background: rgba(255, 255, 200, 0.85);
     border: 1px solid #c0a000;
-    font-size: 14px;
+    font-size: 25px;
     font-family: 'Segoe UI', sans-serif;
     color: #333;
     overflow: hidden;
@@ -89,7 +89,7 @@ body {
     height: 100%;
     border: none;
     background: transparent;
-    font-size: 14px;
+    font-size: 25px;
     font-family: 'Segoe UI', sans-serif;
     color: #333;
     outline: none;
