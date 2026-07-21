@@ -26,8 +26,11 @@ window.addEventListener('DOMContentLoaded', function() {
     if (seq) {
         document.getElementById('docInfo').textContent = 'seq: ' + seq + (formid ? ' | formid: ' + formid : '');
         loadImage(1);
-        if (formid) loadFields();
-        runOcr(false);
+        if (formid) {
+            loadFields().then(function() { runOcr(false); });
+        } else {
+            runOcr(false);
+        }
     } else {
         document.getElementById('docInfo').textContent = 'seq parameter missing';
     }
