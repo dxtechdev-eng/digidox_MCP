@@ -27,5 +27,7 @@ OLLAMA_MODEL = _cfg.get("ollama", "model", fallback="gemma4:26b")
 OLLAMA_REMOTE_URL = _cfg.get("ollama", "remote_url", fallback="http://192.168.10.104:11435")
 OLLAMA_REMOTE_MODEL = _cfg.get("ollama", "remote_model", fallback="qwen3.6:35b-a3b")
 
-# OpenAI
+# OpenAI (PoC용 fallback)
 OPENAI_API_KEY = _cfg.get("openai", "api_key", fallback="")
+OPENAI_MODEL = _cfg.get("openai", "model", fallback="gpt-4o")
+OPENAI_MAX_TOKENS = _cfg.getint("openai", "max_tokens", fallback=4096)

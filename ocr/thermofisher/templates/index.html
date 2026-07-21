@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <title>AI OCR - ThermoFisher</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>AI OCR Viewer - ThermoFisher</h1>
+        <div class="header-info">
+            <span id="docInfo"></span>
+            <div class="header-actions">
+                <button id="rerunBtn" onclick="rerunOcr()">Re-Scan</button>
+                <button id="saveBtn" onclick="saveResult()">Save</button>
+                <button onclick="clearForm()">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="panel panel-left">
+            <div class="panel-header">
+                <span>Original</span>
+                <div class="page-nav">
+                    <button id="prevBtn" onclick="changePage(-1)" disabled>◀ Prev</button>
+                    <span id="pageInfo">1 / 1</span>
+                    <button id="nextBtn" onclick="changePage(1)" disabled>Next ▶</button>
+                </div>
+            </div>
+            <div class="image-viewer">
+                <img id="docImage" src="" alt="Document" />
+            </div>
+        </div>
+
+        <div class="panel panel-right">
+            <div class="panel-header">
+                <span>OCR Result</span>
+            </div>
+            <div class="form-viewer">
+
+                <!-- 기본정보 -->
+                <table class="form-table">
+                    <thead>
+                        <tr><th colspan="4" class="section-header">ご依頼主情報</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="label-cell">お名前<br><span class="required">（必須）</span></th>
+                            <td><input type="text" id="NAME" class="form-input"></td>
+                            <th class="label-cell">ご勤務先名称<br><span class="required">（必須）</span></th>
+                            <td><input type="text" id="WORKPLACE" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">部署／学部名<br><span class="required">（必須）</span></th>
+                            <td><input type="text" id="DEPARTMENT" class="form-input"></td>
+                            <th class="label-cell">所属先詳細<br><span class="sub-label">（学科名/研究室名）</span></th>
+                            <td><input type="text" id="AFFILIATION" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">ご住所</th>
+                            <td colspan="3">
+                                <div class="split-cell">
+                                    <div class="split-item">
+                                        <label>〒</label>
+                                        <input type="text" id="ADDRESS_NUM" class="form-input">
+                                    </div>
+                                    <div class="split-item">
+                                        <label>都道府県</label>
+                                        <input type="text" id="PREFECTURE" class="form-input">
+                                    </div>
+                                    <div class="split-item" style="flex:2">
+                                        <label>区市町</label>
+                                        <input type="text" id="DISTRICT" class="form-input">
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">E-mail<br><span class="required">（必須）</span></th>
+                            <td colspan="3"><input type="text" id="EMAIL" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">電話</th>
+                            <td><input type="text" id="PHONE" class="form-input"></td>
+                            <th class="label-cell">FAX</th>
+                            <td><input type="text" id="FAX" class="form-input"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- 대리점 -->
+                <table class="form-table">
+                    <tbody>
+                        <tr>
+                            <th class="label-cell">代理店名</th>
+                            <td><input type="text" id="AGENCY" class="form-input"></td>
+                            <th class="label-cell">支店名</th>
+                            <td><input type="text" id="BRANCH" class="form-input"></td>
+                            <th class="label-cell">担当者名</th>
+                            <td><input type="text" id="MANAGER" class="form-input"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+                <!-- 제품 카테고리 -->
+                <table class="form-table">
+                    <thead>
+                        <tr>
+                            <th class="label-cell" rowspan="2">製品</th>
+                            <th class="section-header" colspan="5">予算状況</th>
+                            <th class="section-header" colspan="5">営業対応</th>
+                        </tr>
+                        <tr>
+                            <th class="label-cell cb-header">A</th>
+                            <th class="label-cell cb-header">B</th>
+                            <th class="label-cell cb-header">C</th>
+                            <th class="label-cell cb-header">D</th>
+                            <th class="label-cell cb-header">E</th>
+                            <th class="label-cell cb-header">A</th>
+                            <th class="label-cell cb-header">B</th>
+                            <th class="label-cell cb-header">C</th>
+                            <th class="label-cell cb-header">D</th>
+                            <th class="label-cell cb-header">E</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 1. フローサイトメトリー -->
+                        <tr>
+                            <th class="label-cell product-name">1. フローサイトメトリー</th>
+                            <td><input type="checkbox" id="FLOWCYTOMETRY_BUDGET_A"></td>
+                            <td><input type="checkbox" id="FLOWCYTOMETRY_B"></td>
+                            <td><input type="checkbox" id="FLOWCYTOMETRY_C"></td>
+                            <td><input type="checkbox" id="FLOWCYTOMETRY_BUDGET_D"></td>
+                            <td><input type="checkbox" id="FLOWCYTOMETRY_BUDGET_E"></td>
+                            <td><input type="checkbox" id="FLOWCYTOMETRY_BIS_A"></td>
+                            <td><input type="checkbox" id="FLOWCYTOMETRY_BIS_B"></td>
+                            <td><input type="checkbox" id="FLOWCYTOMETRY_BIS_C"></td>
+                            <td><input type="checkbox" id="FLOWCYTOMETRY_BIS_D"></td>
+                            <td><input type="checkbox" id="FLOWCYTOMETRY_BIS_E"></td>
+                        </tr>
+                        <!-- 2. セルイメージング、セルカウンター、蛍光染色試薬 -->
+                        <tr>
+                            <th class="label-cell product-name">2. セルイメージング・セルカウンター</th>
+                            <td><input type="checkbox" id="CELL_IMAGING_BUDGET_A"></td>
+                            <td><input type="checkbox" id="CELL_IMAGING_BUDGET_B"></td>
+                            <td><input type="checkbox" id="CELL_IMAGING_BUDGET_C"></td>
+                            <td><input type="checkbox" id="CELL_IMAGING_BUDGET_D"></td>
+                            <td><input type="checkbox" id="CELL_IMAGING_BUDGET_E"></td>
+                            <td><input type="checkbox" id="CELL_IMAGING_BIS_A"></td>
+                            <td><input type="checkbox" id="CELL_IMAGING_BIS_B"></td>
+                            <td><input type="checkbox" id="CELL_IMAGING_BIS_C"></td>
+                            <td><input type="checkbox" id="CELL_IMAGING_BIS_D"></td>
+                            <td><input type="checkbox" id="CELL_IMAGING_BIS_E"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-box">
+            <div class="spinner"></div>
+            <p>OCR Processing...</p>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

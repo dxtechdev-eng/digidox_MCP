@@ -37,10 +37,46 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 뷰어 정적 파일
-VIEWER_DIR = os.path.join(os.path.dirname(__file__), "viewer")
-if os.path.exists(os.path.join(VIEWER_DIR, "static")):
-    app.mount("/viewer/static", StaticFiles(directory=os.path.join(VIEWER_DIR, "static")), name="viewer_static")
+# 정적 파일 마운트
+BASE_DIR = os.path.dirname(__file__)
+VIEWER_DIR = os.path.join(BASE_DIR, "viewer")
+YAMATO_DIR = os.path.join(BASE_DIR, "yamato")
+ITSUWA_DIR = os.path.join(BASE_DIR, "itsuwa")
+DEMOSHEET_VT_DIR = os.path.join(BASE_DIR, "demosheet_vt")
+THERMO_DIR = os.path.join(BASE_DIR, "thermofisher")
+
+for name, d in [("viewer", VIEWER_DIR), ("yamato", YAMATO_DIR), ("itsuwa", ITSUWA_DIR),
+                ("demosheet_vt", DEMOSHEET_VT_DIR), ("thermofisher", THERMO_DIR)]:
+    static_dir = os.path.join(d, "static")
+    if os.path.exists(static_dir):
+        app.mount(f"/{name}/static", StaticFiles(directory=static_dir), name=f"{name}_static")
+# thermofisher static은 /static 으로도 접근 가능 (기존 호환)
+if os.path.exists(os.path.join(THERMO_DIR, "static")):
+    app.mount("/static", StaticFiles(directory=os.path.join(THERMO_DIR, "static")), name="thermo_compat_static")
+
+# PoC formid 분기
+FORMID_TEMPLATE_MAP = {
+    "YAMATO_TEST": "yamato",
+    "TM": "thermofisher",
+    "ITSUWA": "itsuwa",
+    "DEMO_SHEET_VT": "demosheet_vt",
+}
+
+# PoC formid 목록 (API 키 fallback 대상)
+POC_PREFIXES = set(FORMID_TEMPLATE_MAP.keys())
+
+def get_template_type(formid):
+    if not formid:
+        return "overlay"
+    for prefix, ttype in FORMID_TEMPLATE_MAP.items():
+        if formid.startswith(prefix):
+            return ttype
+    return "overlay"
+
+def is_poc_form(formid):
+    if not formid:
+        return False
+    return any(formid.startswith(p) for p in POC_PREFIXES)
 
 # 모든 요청 로깅
 @app.middleware("http")
@@ -453,6 +489,16 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
         api_key = ocr_settings.get("api_key", "")
         model = ocr_settings.get("model", "gpt-4o")
 
+        # PoC formid면 config의 API 키를 fallback으로 사용
+        if is_poc_form(formid) and not api_key:
+            api_key = config.OPENAI_API_KEY
+            model = config.OPENAI_MODEL
+            logger.info(f"PoC formid 감지 — config API 키 사용")
+
+        if not api_key and engine == "openai":
+            logger.warning(f"API 키 없음 — OCR 실행 불가")
+            return {"resultCode": "401", "resultMsg": "API key required", "seq": seq, "formid": formid, "ocrResult": None}
+
         # 2. PDF 다운로드
         logger.info(f"PDF 다운로드 중... seq={seq}")
         pdf_bytes = download_pdf(seq)
@@ -651,8 +697,28 @@ async def vision_annotate(request: Request):
 
 @app.get("/", response_class=HTMLResponse)
 async def viewer(request: Request):
-    """범용 OCR 오버레이 뷰어"""
-    template_path = os.path.join(VIEWER_DIR, "templates", "index.html")
+    """formid에 따라 PoC 템플릿 또는 범용 오버레이 뷰어"""
+    key = request.query_params.get("key", "")
+    template_type = "overlay"
+    if key:
+        try:
+            decoded = base64.b64decode(key).decode("utf-8")
+            params = parse_qs(decoded)
+            fid = params.get("formid", [""])[0]
+            template_type = get_template_type(fid)
+        except Exception:
+            pass
+
+    template_dirs = {
+        "yamato": YAMATO_DIR,
+        "itsuwa": ITSUWA_DIR,
+        "demosheet_vt": DEMOSHEET_VT_DIR,
+        "thermofisher": THERMO_DIR,
+        "overlay": VIEWER_DIR,
+    }
+    tdir = template_dirs.get(template_type, VIEWER_DIR)
+    template_path = os.path.join(tdir, "templates", "index.html")
+
     if os.path.exists(template_path):
         with open(template_path, encoding="utf-8") as f:
             return HTMLResponse(f.read())

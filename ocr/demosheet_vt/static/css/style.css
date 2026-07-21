@@ -1,0 +1,182 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Meiryo', 'Segoe UI', sans-serif;
+    background: #f0f2f5;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+.header h1 { font-size: 16px; font-weight: 600; }
+.header-info { display: flex; align-items: center; gap: 16px; }
+.header-info span { font-size: 13px; color: #aaa; }
+.header-actions { display: flex; gap: 6px; }
+.header-actions button {
+    background: #eee;
+    border: 1px solid #ccc;
+    padding: 4px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.header-actions button:hover { background: #ddd; }
+#rerunBtn { background: #4a90d9; color: #fff; border: 1px solid #357abd; }
+#rerunBtn:hover { background: #357abd; }
+#saveBtn { background: #27ae60; color: #fff; border: 1px solid #219a52; }
+#saveBtn:hover { background: #219a52; }
+
+.container { display: flex; flex: 1; overflow: hidden; }
+
+.panel { display: flex; flex-direction: column; }
+.panel-left { flex: 1; border-right: 2px solid #ccc; }
+.panel-right { flex: 1; overflow: hidden; }
+.panel-header {
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    flex-shrink: 0;
+}
+
+.image-viewer {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 12px;
+    background: #d8d8d8;
+}
+.image-viewer img {
+    max-width: 100%;
+    height: auto;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+
+.form-viewer {
+    flex: 1;
+    overflow: auto;
+    padding: 10px;
+    background: #fff;
+}
+
+/* 타이틀 */
+.form-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    background: #e8edf2;
+    border: 1px solid #333;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.date-row { display: flex; align-items: center; gap: 4px; }
+.date-row label { font-size: 11px; }
+
+/* 테이블 */
+.form-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-bottom: 6px;
+}
+.form-table th,
+.form-table td {
+    border: 1px solid #999;
+    padding: 3px 5px;
+    vertical-align: middle;
+}
+.label-cell {
+    background: #e8edf2;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    font-size: 10px;
+    min-width: 60px;
+}
+.section-header {
+    background: #d0d8e2;
+    font-weight: 600;
+    text-align: left;
+    font-size: 11px;
+    padding: 4px 8px;
+}
+.w-sm { width: 30px; }
+
+/* 입력 필드 */
+.form-input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    padding: 2px 2px;
+    font-size: 12px;
+    font-family: 'Meiryo', sans-serif;
+    background: transparent;
+    outline: none;
+}
+.form-input:focus {
+    border-bottom-color: #4a90d9;
+    background: #f8fbff;
+}
+.input-sm { width: 35px; display: inline-block; text-align: center; }
+.suffix { font-size: 11px; margin-left: 2px; color: #333; }
+.slash-cell { text-align: center; color: #999; font-size: 14px; background: #f0f0f0; }
+.fixed-price { text-align: center; font-size: 11px; color: #333; background: #f0f0f0; white-space: nowrap; }
+.system-label { float: right; font-size: 10px; color: #666; }
+.form-input + .suffix { display: inline; }
+td:has(.suffix) .form-input { width: calc(100% - 20px); display: inline-block; }
+
+/* 체크박스 */
+.cb-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-right: 8px;
+}
+.cb-label input[type="checkbox"] { margin: 0; cursor: pointer; }
+
+/* 로딩 */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+.loading-overlay.active { display: flex; }
+.loading-box {
+    background: #fff;
+    padding: 40px 60px;
+    border-radius: 12px;
+    text-align: center;
+}
+.loading-box p { margin-top: 16px; font-size: 14px; color: #333; }
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #ddd;
+    border-top-color: #4a90d9;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

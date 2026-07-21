@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <title>AI OCR - HBR入庫日誌</title>
+    <link rel="stylesheet" href="/itsuwa/static/css/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>AI OCR Viewer - HBR入庫日誌</h1>
+        <div class="header-info">
+            <span id="docInfo"></span>
+            <div class="header-actions">
+                <button id="rerunBtn" onclick="rerunOcr()">Re-Scan</button>
+                <button id="saveBtn" onclick="saveResult()">Save</button>
+                <button onclick="clearForm()">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 왼쪽: 원본 이미지 -->
+        <div class="panel panel-left">
+            <div class="panel-header">
+                <span>Original</span>
+            </div>
+            <div class="image-viewer">
+                <img id="docImage" src="" alt="Document" />
+            </div>
+        </div>
+
+        <!-- 오른쪽: OCR 결과 폼 -->
+        <div class="panel panel-right">
+            <div class="panel-header">
+                <span>OCR Result</span>
+            </div>
+            <div class="form-viewer">
+
+                <div class="form-title">
+                    <span>HBR包装 入庫報告書</span>
+                </div>
+
+                <table class="form-table">
+                    <thead>
+                        <tr>
+                            <th class="label-cell">時間</th>
+                            <th class="label-cell">包装形態</th>
+                            <th class="label-cell">点検者</th>
+                            <th class="label-cell">異物目視</th>
+                            <th class="label-cell">汚れ・破れ</th>
+                            <th class="label-cell">荷姿</th>
+                            <th class="label-cell">IJP</th>
+                            <th class="label-cell">印字</th>
+                            <th class="label-cell">カード</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" id="time_1" class="form-input input-md"></td>
+                            <td><input type="text" id="packcondition_1" class="form-input input-md"></td>
+                            <td><input type="text" id="inspector_1" class="form-input input-md"></td>
+                            <td><input type="text" id="foreignsub_1" class="form-input input-sm"></td>
+                            <td><input type="text" id="poll_1" class="form-input input-sm"></td>
+                            <td><input type="text" id="defect_1" class="form-input input-sm"></td>
+                            <td><input type="text" id="ijp_1" class="form-input input-sm"></td>
+                            <td><input type="text" id="verifier_1" class="form-input input-sm"></td>
+                            <td><input type="text" id="card_1" class="form-input input-sm"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="time_2" class="form-input input-md"></td>
+                            <td><input type="text" id="packcondition_2" class="form-input input-md"></td>
+                            <td><input type="text" id="inspector_2" class="form-input input-md"></td>
+                            <td><input type="text" id="foreignsub_2" class="form-input input-sm"></td>
+                            <td><input type="text" id="poll_2" class="form-input input-sm"></td>
+                            <td><input type="text" id="defect_2" class="form-input input-sm"></td>
+                            <td><input type="text" id="ijp_2" class="form-input input-sm"></td>
+                            <td><input type="text" id="verifier_2" class="form-input input-sm"></td>
+                            <td><input type="text" id="card_2" class="form-input input-sm"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="time_3" class="form-input input-md"></td>
+                            <td><input type="text" id="packcondition_3" class="form-input input-md"></td>
+                            <td><input type="text" id="inspector_3" class="form-input input-md"></td>
+                            <td><input type="text" id="foreignsub_3" class="form-input input-sm"></td>
+                            <td><input type="text" id="poll_3" class="form-input input-sm"></td>
+                            <td><input type="text" id="defect_3" class="form-input input-sm"></td>
+                            <td><input type="text" id="ijp_3" class="form-input input-sm"></td>
+                            <td><input type="text" id="verifier_3" class="form-input input-sm"></td>
+                            <td><input type="text" id="card_3" class="form-input input-sm"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="time_4" class="form-input input-md"></td>
+                            <td><input type="text" id="packcondition_4" class="form-input input-md"></td>
+                            <td><input type="text" id="inspector_4" class="form-input input-md"></td>
+                            <td><input type="text" id="foreignsub_4" class="form-input input-sm"></td>
+                            <td><input type="text" id="poll_4" class="form-input input-sm"></td>
+                            <td><input type="text" id="defect_4" class="form-input input-sm"></td>
+                            <td><input type="text" id="ijp_4" class="form-input input-sm"></td>
+                            <td><input type="text" id="verifier_4" class="form-input input-sm"></td>
+                            <td><input type="text" id="card_4" class="form-input input-sm"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="time_5" class="form-input input-md"></td>
+                            <td><input type="text" id="packcondition_5" class="form-input input-md"></td>
+                            <td><input type="text" id="inspector_5" class="form-input input-md"></td>
+                            <td><input type="text" id="foreignsub_5" class="form-input input-sm"></td>
+                            <td><input type="text" id="poll_5" class="form-input input-sm"></td>
+                            <td><input type="text" id="defect_5" class="form-input input-sm"></td>
+                            <td><input type="text" id="ijp_5" class="form-input input-sm"></td>
+                            <td><input type="text" id="verifier_5" class="form-input input-sm"></td>
+                            <td><input type="text" id="card_5" class="form-input input-sm"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="time_6" class="form-input input-md"></td>
+                            <td><input type="text" id="packcondition_6" class="form-input input-md"></td>
+                            <td><input type="text" id="inspector_6" class="form-input input-md"></td>
+                            <td><input type="text" id="foreignsub_6" class="form-input input-sm"></td>
+                            <td><input type="text" id="poll_6" class="form-input input-sm"></td>
+                            <td><input type="text" id="defect_6" class="form-input input-sm"></td>
+                            <td><input type="text" id="ijp_6" class="form-input input-sm"></td>
+                            <td><input type="text" id="verifier_6" class="form-input input-sm"></td>
+                            <td><input type="text" id="card_6" class="form-input input-sm"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="time_7" class="form-input input-md"></td>
+                            <td><input type="text" id="packcondition_7" class="form-input input-md"></td>
+                            <td><input type="text" id="inspector_7" class="form-input input-md"></td>
+                            <td><input type="text" id="foreignsub_7" class="form-input input-sm"></td>
+                            <td><input type="text" id="poll_7" class="form-input input-sm"></td>
+                            <td><input type="text" id="defect_7" class="form-input input-sm"></td>
+                            <td><input type="text" id="ijp_7" class="form-input input-sm"></td>
+                            <td><input type="text" id="verifier_7" class="form-input input-sm"></td>
+                            <td><input type="text" id="card_7" class="form-input input-sm"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="time_8" class="form-input input-md"></td>
+                            <td><input type="text" id="packcondition_8" class="form-input input-md"></td>
+                            <td><input type="text" id="inspector_8" class="form-input input-md"></td>
+                            <td><input type="text" id="foreignsub_8" class="form-input input-sm"></td>
+                            <td><input type="text" id="poll_8" class="form-input input-sm"></td>
+                            <td><input type="text" id="defect_8" class="form-input input-sm"></td>
+                            <td><input type="text" id="ijp_8" class="form-input input-sm"></td>
+                            <td><input type="text" id="verifier_8" class="form-input input-sm"></td>
+                            <td><input type="text" id="card_8" class="form-input input-sm"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 로딩 오버레이 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-box">
+            <div class="spinner"></div>
+            <p>OCR Processing...</p>
+        </div>
+    </div>
+
+    <script src="/itsuwa/static/js/app.js"></script>
+</body>
+</html>

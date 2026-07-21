@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <title>AI OCR - Phiếu kiểm tra bảo trì</title>
+    <link rel="stylesheet" href="/demosheet_vt/static/css/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>AI OCR Viewer - Preventive Maintenance Check Sheet</h1>
+        <div class="header-info">
+            <span id="docInfo"></span>
+            <div class="header-actions">
+                <button id="rerunBtn" onclick="rerunOcr()">Re-Scan</button>
+                <button id="saveBtn" onclick="saveResult()">Save</button>
+                <button onclick="clearForm()">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="panel panel-left">
+            <div class="panel-header"><span>Original</span></div>
+            <div class="image-viewer">
+                <img id="docImage" src="" alt="Document" />
+            </div>
+        </div>
+
+        <div class="panel panel-right">
+            <div class="panel-header"><span>OCR Result</span></div>
+            <div class="form-viewer">
+
+                <!-- Work Date & Time -->
+                <table class="form-table">
+                    <thead>
+                        <tr><th colspan="2" class="section-header">Ngày và giờ làm việc (Work Date & Time)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="label-cell">Ngày làm việc</th>
+                            <td><input type="text" id="WORK_DATE" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">Giờ kết thúc</th>
+                            <td><input type="text" id="WOKR_ENDDATE" class="form-input"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Work Team -->
+                <table class="form-table">
+                    <thead>
+                        <tr><th colspan="2" class="section-header">Ca làm việc (Work Team)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="label-cell">Ca</th>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="WORK_CHECK_A"> A조</label>
+                                <label class="cb-label"><input type="checkbox" id="WORK_CHECK_B"> B조</label>
+                                <label class="cb-label"><input type="checkbox" id="WORK_CHECK_C"> C조</label>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Worker -->
+                <table class="form-table">
+                    <thead>
+                        <tr><th colspan="2" class="section-header">Công nhân (Worker)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="label-cell">Mã NV</th>
+                            <td><input type="text" id="WORKERNO" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">Tên NV</th>
+                            <td><input type="text" id="WORKERNAME" class="form-input"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Level & Gauge Check -->
+                <div style="display:flex;gap:8px;">
+                    <table class="form-table" style="flex:1;">
+                        <thead>
+                            <tr><th colspan="2" class="section-header">Level Check</th></tr>
+                            <tr>
+                                <th class="label-cell">#</th>
+                                <th class="label-cell">Giá trị</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><th class="label-cell">01</th><td><input type="text" id="LEVEL_VALUE.01" class="form-input"></td></tr>
+                            <tr><th class="label-cell">02</th><td><input type="text" id="LEVEL_VALUE.02" class="form-input"></td></tr>
+                            <tr><th class="label-cell">03</th><td><input type="text" id="LEVEL_VALUE.03" class="form-input"></td></tr>
+                            <tr><th class="label-cell">04</th><td><input type="text" id="LEVEL_VALUE.04" class="form-input"></td></tr>
+                            <tr><th class="label-cell">05</th><td><input type="text" id="LEVEL_VALUE.05" class="form-input"></td></tr>
+                            <tr><th class="label-cell">06</th><td><input type="text" id="LEVEL_VALUE.06" class="form-input"></td></tr>
+                        </tbody>
+                    </table>
+                    <table class="form-table" style="flex:1;">
+                        <thead>
+                            <tr><th colspan="3" class="section-header">Gauge Check</th></tr>
+                            <tr>
+                                <th class="label-cell">#</th>
+                                <th class="label-cell">PSI</th>
+                                <th class="label-cell">°C</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><th class="label-cell">01</th><td><input type="text" id="GAUGE_VALUE.01" class="form-input"></td><td><input type="text" id="GAUGE_CVALUE.01" class="form-input"></td></tr>
+                            <tr><th class="label-cell">02</th><td><input type="text" id="GAUGE_VALUE.02" class="form-input"></td><td><input type="text" id="GAUGE_CVALUE.02" class="form-input"></td></tr>
+                            <tr><th class="label-cell">03</th><td><input type="text" id="GAUGE_VALUE.03" class="form-input"></td><td><input type="text" id="GAUGE_CVALUE.03" class="form-input"></td></tr>
+                            <tr><th class="label-cell">04</th><td><input type="text" id="GAUGE_VALUE.04" class="form-input"></td><td><input type="text" id="GAUGE_CVALUE.04" class="form-input"></td></tr>
+                            <tr><th class="label-cell">05</th><td><input type="text" id="GAUGE_VALUE.05" class="form-input"></td><td><input type="text" id="GAUGE_CVALUE.05" class="form-input"></td></tr>
+                            <tr><th class="label-cell">06</th><td><input type="text" id="GAUGE_VALUE.06" class="form-input"></td><td><input type="text" id="GAUGE_CVALUE.06" class="form-input"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Status Check -->
+                <table class="form-table">
+                    <thead>
+                        <tr><th colspan="8" class="section-header">Kiểm tra trạng thái (Status Check)</th></tr>
+                        <tr>
+                            <th class="label-cell">EQ No.</th>
+                            <th class="label-cell">Dây đai</th>
+                            <th class="label-cell">Ròng rọc</th>
+                            <th class="label-cell">Cánh quạt</th>
+                            <th class="label-cell">Cân bằng</th>
+                            <th class="label-cell" colspan="3">Tình trạng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" id="ST_EQNO.01" class="form-input"></td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.01"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.01"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.06"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.06"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.11"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.11"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.16"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.16"> xấu</label>
+                            </td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_A.01"> A</label></td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_B.01"> B</label></td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_C.01"> C</label></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="ST_EQNO.02" class="form-input"></td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.02"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.02"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.7"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.07"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.12"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.12"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.17"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.17"> xấu</label>
+                            </td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_A.02"> A</label></td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_B.02"> B</label></td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_C.02"> C</label></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="ST_EQNO.03" class="form-input"></td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.03"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.03"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.08"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.08"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.13"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.13"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.18"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.18"> xấu</label>
+                            </td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_A.03"> A</label></td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_B.03"> B</label></td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_C.03"> C</label></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="ST_EQNO.04" class="form-input"></td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.04"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.04"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.09"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.09"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.14"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.14"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.19"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.19"> xấu</label>
+                            </td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_A.04"> A</label></td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_B.04"> B</label></td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_C.04"> C</label></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="ST_EQNO.05" class="form-input"></td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.05"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.05"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.10"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.10"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.15"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.15"> xấu</label>
+                            </td>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="ST_GOOD.20"> tốt</label>
+                                <label class="cb-label"><input type="checkbox" id="ST_BAD.20"> xấu</label>
+                            </td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_A.05"> A</label></td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_B.05"> B</label></td>
+                            <td><label class="cb-label"><input type="checkbox" id="ST_CONDITION_C.05"> C</label></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Remark -->
+                <table class="form-table">
+                    <thead>
+                        <tr><th class="section-header">Ghi chú (Remark)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><textarea id="MEMO" class="form-input" style="width:100%;height:80px;resize:vertical;"></textarea></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-box">
+            <div class="spinner"></div>
+            <p>OCR Processing...</p>
+        </div>
+    </div>
+
+    <script src="/demosheet_vt/static/js/app.js"></script>
+</body>
+</html>

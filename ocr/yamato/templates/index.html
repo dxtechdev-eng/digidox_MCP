@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <title>AI OCR - YAMATO Gift Order</title>
+    <link rel="stylesheet" href="/yamato/static/css/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>AI OCR Viewer - YAMATO</h1>
+        <div class="header-info">
+            <span id="docInfo"></span>
+            <div class="header-actions">
+                <button id="rerunBtn" onclick="rerunOcr()">Re-Scan</button>
+                <button id="saveBtn" onclick="saveResult()">Save</button>
+                <button onclick="clearForm()">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 왼쪽: 원본 이미지 -->
+        <div class="panel panel-left">
+            <div class="panel-header">
+                <span>Original</span>
+            </div>
+            <div class="image-viewer">
+                <img id="docImage" src="" alt="Document" />
+            </div>
+        </div>
+
+        <!-- 오른쪽: OCR 결과 폼 -->
+        <div class="panel panel-right">
+            <div class="panel-header">
+                <span>OCR Result</span>
+            </div>
+            <div class="form-viewer">
+
+                <!-- 타이틀 + 날짜 -->
+                <div class="form-title">
+                    <span>お申込書（選べるギフト）</span>
+                    <div class="date-row">
+                        <label>年</label><input type="text" id="YEAR" class="form-input input-sm">
+                        <label>月</label><input type="text" id="MONTH" class="form-input input-sm">
+                        <label>日</label><input type="text" id="DAY" class="form-input input-sm">
+                    </div>
+                </div>
+
+                <!-- 의뢰주 1 -->
+                <table class="form-table">
+                    <thead>
+                        <tr>
+                            <th colspan="5" class="section-header">ご依頼主 (1)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="label-cell">ふりがな</th>
+                            <td><input type="text" id="HURIGANA_1" class="form-input"></td>
+                            <th class="label-cell">〒</th>
+                            <td><input type="text" id="POSTCODE_1" class="form-input"></td>
+                            <th class="label-cell">TEL</th>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">お名前</th>
+                            <td><input type="text" id="NAME_1" class="form-input"><span class="suffix">様</span></td>
+                            <th class="label-cell">ご住所</th>
+                            <td><input type="text" id="ADDRESS_1" class="form-input"></td>
+                            <td><input type="text" id="TEL_1" class="form-input"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- 의뢰주 2 (届先) -->
+                <table class="form-table">
+                    <thead>
+                        <tr>
+                            <th colspan="5" class="section-header">ご連絡先様名 (2)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="label-cell">ふりがな</th>
+                            <td><input type="text" id="HURIGANA_2" class="form-input"></td>
+                            <th class="label-cell">〒</th>
+                            <td><input type="text" id="POSTCODE_2" class="form-input"></td>
+                            <th class="label-cell">TEL</th>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">お名前</th>
+                            <td><input type="text" id="NAME_2" class="form-input"><span class="suffix">様</span></td>
+                            <th class="label-cell">ご住所</th>
+                            <td><input type="text" id="ADDRESS_2" class="form-input"></td>
+                            <td><input type="text" id="TEL_2" class="form-input"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+                <!-- 상품 목록 -->
+                <table class="form-table">
+                    <thead>
+                        <tr>
+                            <th class="label-cell">カタログ・コース名</th>
+                            <th class="label-cell">センター出し数量</th>
+                            <th class="label-cell">店出し数量</th>
+                            <th class="label-cell">単価</th>
+                            <th class="label-cell">金額</th>
+                            <th class="label-cell">ハガキNo.<br><span class="sub-label">（お待ち帰り/店頭配送の際記入）</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" id="COURSE_1" class="form-input"></td>
+                            <td><input type="text" id="C_1" class="form-input input-sm"></td>
+                            <td><input type="text" id="S_1" class="form-input input-sm"></td>
+                            <td><input type="text" id="UNIT_1" class="form-input"><span class="suffix">円</span></td>
+                            <td><input type="text" id="AMOUNT_1" class="form-input"><span class="suffix">円</span></td>
+                            <td><input type="text" id="HAGAKI_1" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="COURSE_2" class="form-input"></td>
+                            <td><input type="text" id="C_2" class="form-input input-sm"></td>
+                            <td><input type="text" id="S_2" class="form-input input-sm"></td>
+                            <td><input type="text" id="UNIT_2" class="form-input"><span class="suffix">円</span></td>
+                            <td><input type="text" id="AMOUNT_2" class="form-input"><span class="suffix">円</span></td>
+                            <td><input type="text" id="HAGAKI_2" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="COURSE_3" class="form-input"></td>
+                            <td><input type="text" id="C_3" class="form-input input-sm"></td>
+                            <td><input type="text" id="S_3" class="form-input input-sm"></td>
+                            <td><input type="text" id="UNIT_3" class="form-input"><span class="suffix">円</span></td>
+                            <td><input type="text" id="AMOUNT_3" class="form-input"><span class="suffix">円</span></td>
+                            <td><input type="text" id="HAGAKI_3" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="COURSE_4" class="form-input"></td>
+                            <td><input type="text" id="C_4" class="form-input input-sm"></td>
+                            <td><input type="text" id="S_4" class="form-input input-sm"></td>
+                            <td><input type="text" id="UNIT_4" class="form-input"><span class="suffix">円</span></td>
+                            <td><input type="text" id="AMOUNT_4" class="form-input"><span class="suffix">円</span></td>
+                            <td><input type="text" id="HAGAKI_4" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="COURSE_5" class="form-input"></td>
+                            <td><input type="text" id="C_5" class="form-input input-sm"></td>
+                            <td><input type="text" id="S_5" class="form-input input-sm"></td>
+                            <td><input type="text" id="UNIT_5" class="form-input"><span class="suffix">円</span></td>
+                            <td><input type="text" id="AMOUNT_5" class="form-input"><span class="suffix">円</span></td>
+                            <td><input type="text" id="HAGAKI_5" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">小計</th>
+                            <td><input type="text" id="C_TOTAL" class="form-input input-sm"></td>
+                            <td><input type="text" id="S_TOTAL" class="form-input input-sm"></td>
+                            <td class="slash-cell">/</td>
+                            <td><input type="text" id="AMOUNT_6" class="form-input"><span class="suffix">円</span></td>
+                            <td rowspan="11"><textarea id="NOTES_2" class="form-input" style="width:100%;height:100%;resize:none;"></textarea></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">D</th>
+                            <td><input type="text" id="C_TOTAL_D" class="form-input input-sm"></td>
+                            <td><input type="text" id="S_TOTAL_D" class="form-input input-sm"></td>
+                            <td class="slash-cell">/</td>
+                            <td><input type="text" id="AMOUNT_7" class="form-input"><span class="suffix">円</span></td>
+                        </tr>
+                        <tr>
+                            <td>ミストラル・沙羅・おめでと・他 <span class="system-label">システム料</span></td>
+                            <td colspan="2"><input type="text" id="SYSTEM_1" class="form-input"></td>
+                            <td class="fixed-price">800円</td>
+                            <td><input type="text" id="AMOUNT_8" class="form-input"><span class="suffix">円</span></td>
+                        </tr>
+                        <tr>
+                            <td>グルメ・銘酒・他 <span class="system-label">システム料</span></td>
+                            <td colspan="2"><input type="text" id="SYSTEM_2" class="form-input"></td>
+                            <td class="fixed-price">1,000円</td>
+                            <td><input type="text" id="AMOUNT_9" class="form-input"><span class="suffix">円</span></td>
+                        </tr>
+                        <tr>
+                            <td>dancyu <span class="system-label">システム料</span></td>
+                            <td colspan="2"><input type="text" id="SYSTEM_3" class="form-input"></td>
+                            <td class="fixed-price">1,200円</td>
+                            <td><input type="text" id="AMOUNT_10" class="form-input"><span class="suffix">円</span></td>
+                        </tr>
+                        <tr>
+                            <td>その他 <span class="system-label">システム料</span></td>
+                            <td colspan="2"><input type="text" id="SYSTEM_4" class="form-input"></td>
+                            <td><input type="text" id="UNIT_6" class="form-input"><span class="suffix">円</span></td>
+                            <td><input type="text" id="AMOUNT_11" class="form-input"><span class="suffix">円</span></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="EMPTY" class="form-input"></td>
+                            <td colspan="2"><input type="text" id="UNIT_7" class="form-input"></td>
+                            <td><input type="text" id="AMOUNT_12_UNIT" class="form-input"><span class="suffix">円</span></td>
+                            <td><input type="text" id="AMOUNT_12" class="form-input"><span class="suffix">円</span></td>
+                        </tr>
+                        <tr>
+                            <td>カタログ送料</td>
+                            <td colspan="2"><input type="text" id="CATALOG" class="form-input"></td>
+                            <td class="fixed-price">650円</td>
+                            <td><input type="text" id="AMOUNT_13" class="form-input"><span class="suffix">円</span></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">計</th>
+                            <td colspan="3" class="slash-cell">/</td>
+                            <td><input type="text" id="AMOUNT_14" class="form-input"><span class="suffix">円</span></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">消費税</th>
+                            <td colspan="3" class="slash-cell">/</td>
+                            <td><input type="text" id="AMOUNT_15" class="form-input"><span class="suffix">円</span></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">合計</th>
+                            <td colspan="3" class="slash-cell">/</td>
+                            <td><input type="text" id="AMOUNT_16" class="form-input"><span class="suffix">円</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- 보고서 / 지정일 -->
+                <table class="form-table">
+                    <tbody>
+                        <tr>
+                            <th class="label-cell">報告書</th>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="REPORT_OK"> 要</label>
+                                <label class="cb-label"><input type="checkbox" id="REPORT_NO"> 不要</label>
+                            </td>
+                            <th class="label-cell">お届指定日</th>
+                            <td>
+                                <input type="text" id="TODOKE_MONTH" class="form-input input-sm">月
+                                <input type="text" id="TODOKE_DAY" class="form-input input-sm">日
+                            </td>
+                            <th class="label-cell">発送指定日</th>
+                            <td>
+                                <input type="text" id="HASSOU_MONTH" class="form-input input-sm">月
+                                <input type="text" id="HASSOU_DAY" class="form-input input-sm">日
+                            </td>
+                            <td><input type="text" id="NOTES_1" class="form-input"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+
+                <!-- 内祝・のし・用途 -->
+                <table class="form-table">
+                    <thead>
+                        <tr><th colspan="2" class="section-header">進物体裁</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="label-cell">内祝</th>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="HANA"> 花結</label>
+                                <label class="cb-label"><input type="checkbox" id="KET"> 婚礼</label>
+                                <label class="cb-label"><input type="checkbox" id="SYUSSAN"> 出産</label>
+                                <label class="cb-label"><input type="checkbox" id="KAIKI"> 快気</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">お見舞い</th>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="KOHAKU"> 紅白</label>
+                                <label class="cb-label"><input type="checkbox" id="MUJI"> 無地短冊</label>
+                                <label class="cb-label"><input type="checkbox" id="KUROSIRO"> 黒白</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">志</th>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="REN_OK"> 連あり</label>
+                                <label class="cb-label"><input type="checkbox" id="REN_NO"> 連なし</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">その他</th>
+                            <td><input type="text" id="SONOTA" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">熨斗</th>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="NOSI_UCHI"> 内</label>
+                                <label class="cb-label"><input type="checkbox" id="NOSI_SOTO"> 外</label>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- 使用日 -->
+                <table class="form-table">
+                    <tbody>
+                        <tr>
+                            <th class="label-cell">使用日</th>
+                            <td>
+                                <input type="text" id="USE_MONTH" class="form-input input-sm">月
+                                <input type="text" id="USE_DAY" class="form-input input-sm">日
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">お持帰り</th>
+                            <td><input type="text" id="SIYOU_1" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">発送</th>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="SIYOU_2"> A.店</label>
+                                <label class="cb-label"><input type="checkbox" id="SIYOU_2_2"> B.センター</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">狀付宛名</th>
+                            <td>
+                                <label class="cb-label"><input type="checkbox" id="SIYOU_3"> あり</label>
+                                <label class="cb-label"><input type="checkbox" id="SIYOU_3_2"> なし</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">カード付</th>
+                            <td><input type="text" id="CARD_1" class="form-input"><input type="hidden" id="SIYOU_4"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell"></th>
+                            <td><input type="text" id="CARD_2" class="form-input"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+                <!-- 배송처 추가 -->
+                <table class="form-table">
+                    <thead>
+                        <tr>
+                            <th class="label-cell">お届先様お名前</th>
+                            <th class="label-cell">〒</th>
+                            <th class="label-cell">ご住所</th>
+                            <th class="label-cell">TEL</th>
+                            <th class="label-cell">カタログ・コース名</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" id="NAME_3" class="form-input"><span class="suffix">様</span></td>
+                            <td><input type="text" id="POSTCODE_3" class="form-input"></td>
+                            <td><input type="text" id="ADDRESS_3" class="form-input"></td>
+                            <td><input type="text" id="TEL_3" class="form-input"></td>
+                            <td><input type="text" id="CC_1" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="NAME_4" class="form-input"><span class="suffix">様</span></td>
+                            <td><input type="text" id="POSTCODE_4" class="form-input"></td>
+                            <td><input type="text" id="ADDRESS_4" class="form-input"></td>
+                            <td><input type="text" id="TEL_4" class="form-input"></td>
+                            <td><input type="text" id="CC_2" class="form-input"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 로딩 오버레이 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-box">
+            <div class="spinner"></div>
+            <p>OCR Processing...</p>
+        </div>
+    </div>
+
+    <script src="/yamato/static/js/app.js"></script>
+</body>
+</html>
