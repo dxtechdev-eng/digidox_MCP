@@ -120,7 +120,6 @@ function renderOverlays() {
         if (!info.left && info.left !== 0) continue;
 
         var value = data[fid] !== undefined ? data[fid] : '';
-        if (!value && value !== 0) continue; // 빈 값은 오버레이 안 함
 
         var div = document.createElement('div');
         div.className = 'ocr-overlay';
