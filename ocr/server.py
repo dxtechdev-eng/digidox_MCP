@@ -472,22 +472,44 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
         # 1. 폼 정보
         form_info = None
         ocr_settings = {}
+        prompt_from_settings = None
         if formid:
             try:
                 form_info = get_form_info(formid)
-                ocr_settings = {
-                    "engine": form_info.get("ocrEngine", "openai"),
-                    "api_url": form_info.get("ocrApiUrl", "https://api.openai.com"),
-                    "api_key": form_info.get("ocrApiKey", ""),
-                    "model": form_info.get("ocrModel", "gpt-4o"),
-                }
+
+                # promptInfo가 JSON이면 파싱하여 OCR 설정 추출
+                prompt_info_raw = form_info.get("promptInfo", "")
+                if prompt_info_raw and isinstance(prompt_info_raw, str):
+                    try:
+                        pi = json.loads(prompt_info_raw)
+                        if isinstance(pi, dict) and "apiKey" in pi:
+                            engine_map = {"gpt": "openai", "openai": "openai", "anthropic": "anthropic", "ollama": "ollama"}
+                            ocr_settings = {
+                                "engine": engine_map.get(pi.get("ocrType", ""), pi.get("ocrType", "openai")),
+                                "api_url": pi.get("apiUrl", "https://api.openai.com"),
+                                "api_key": pi.get("apiKey", ""),
+                                "model": pi.get("model", "gpt-4o"),
+                            }
+                            prompt_from_settings = pi.get("prompt", "")
+                            logger.info(f"promptInfo JSON에서 OCR 설정 추출: engine={ocr_settings['engine']}, model={ocr_settings['model']}, apiKey={'있음' if ocr_settings['api_key'] else '없음'}")
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+
+                # promptInfo JSON에서 못 가져왔으면 최상위 필드에서 시도
+                if not ocr_settings:
+                    ocr_settings = {
+                        "engine": form_info.get("ocrEngine") or "openai",
+                        "api_url": form_info.get("ocrApiUrl") or "https://api.openai.com",
+                        "api_key": form_info.get("ocrApiKey") or "",
+                        "model": form_info.get("ocrModel") or "gpt-4o",
+                    }
             except Exception as e:
                 logger.warning(f"폼 정보 조회 실패: {e}")
 
-        engine = ocr_settings.get("engine", "openai")
-        api_url = ocr_settings.get("api_url", "https://api.openai.com")
-        api_key = ocr_settings.get("api_key", "")
-        model = ocr_settings.get("model", "gpt-4o")
+        engine = ocr_settings.get("engine") or "openai"
+        api_url = ocr_settings.get("api_url") or "https://api.openai.com"
+        api_key = ocr_settings.get("api_key") or ""
+        model = ocr_settings.get("model") or "gpt-4o"
 
         # PoC formid면 config의 API 키를 fallback으로 사용
         if is_poc_form(formid) and not api_key:
@@ -495,7 +517,7 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
             model = config.OPENAI_MODEL
             logger.info(f"PoC formid 감지 — config API 키 사용")
 
-        if not api_key and engine == "openai":
+        if not api_key and engine in ("openai", "anthropic"):
             logger.warning(f"API 키 없음 — OCR 실행 불가")
             return {"resultCode": "401", "resultMsg": "API key required", "seq": seq, "formid": formid, "ocrResult": None}
 
@@ -526,8 +548,8 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
             and fid not in ["S.PAGE_NO", "S.SEQ", "S.QRCODE"]
         }
 
-        if writable_fields:
-            # 셀 단위 OCR
+        if writable_fields and not prompt_from_settings:
+            # 셀 단위 OCR (promptInfo에 전용 프롬프트가 없을 때)
             logger.info(f"셀 단위 OCR: {len(writable_fields)}개 필드")
             img = pdf_to_pil_image(pdf_bytes, 0)
             cell_images = {}
@@ -554,8 +576,8 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
             images = pdf_to_images(pdf_bytes)
             page_count = len(images)
 
-            prompt = None
-            if form_info:
+            prompt = prompt_from_settings  # promptInfo JSON에서 추출한 prompt
+            if not prompt and form_info:
                 prompt_info = form_info.get("promptInfo", "")
                 if page1_fields_list and prompt_info:
                     prompt = prompt_info + build_auto_prompt(page1_fields_list, "ja")
