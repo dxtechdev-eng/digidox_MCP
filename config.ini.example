@@ -1,5 +1,5 @@
 [digidox]
-base_url = https://new.digidox.co.kr
+base_url = http://192.168.10.4:8990
 pdf_path = /service/api/onlypdf.do
 image_path = /service/doc/call/bg.do
 form_path = /service/api/jsonforform.do
@@ -16,6 +16,9 @@ default_max_tokens = 4096
 [ollama]
 url = http://127.0.0.1:11434
 model = gemma4:26b
+# 원격 Ollama (spark 서버) — Vision API 프록시용
+remote_url = http://192.168.10.104:11435
+remote_model = qwen3.6:35b-a3b
 
 [openai]
 api_key =

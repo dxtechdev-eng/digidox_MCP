@@ -604,7 +604,7 @@ async def save_ocr(request: Request):
 
 @app.post("/v1/images:annotate")
 async def vision_annotate(request: Request):
-    """Google Vision API 호환 엔드포인트 — 내부적으로 Ollama OCR 사용"""
+    """Google Vision API 호환 엔드포인트 — spark 원격 Ollama로 프록시"""
     import time
     start_time = time.time()
 
@@ -614,7 +614,7 @@ async def vision_annotate(request: Request):
         return {"responses": []}
 
     requests_list = body.get("requests", [])
-    logger.info(f"[Vision API] 요청 수신: {len(requests_list)}개 이미지")
+    logger.info(f"[Vision API] 요청 수신: {len(requests_list)}개 이미지 → {config.OLLAMA_REMOTE_URL} ({config.OLLAMA_REMOTE_MODEL})")
 
     responses = []
     for i, req in enumerate(requests_list):
@@ -626,7 +626,7 @@ async def vision_annotate(request: Request):
         prompt = "Read the handwritten text in this image. Return only the recognized text. If the image is empty or has no handwritten text, return nothing."
 
         try:
-            text = ocr_with_ollama([image_content], prompt, config.OLLAMA_URL, config.OLLAMA_MODEL)
+            text = ocr_with_ollama([image_content], prompt, config.OLLAMA_REMOTE_URL, config.OLLAMA_REMOTE_MODEL)
             text = text.strip()
             logger.info(f"[Vision API] 이미지 {i}: '{text}'")
 

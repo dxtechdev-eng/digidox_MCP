@@ -20,9 +20,12 @@ SERVER_PORT = _cfg.getint("server", "port", fallback=7001)
 # OCR
 DEFAULT_MAX_TOKENS = _cfg.getint("ocr", "default_max_tokens", fallback=4096)
 
-# Ollama
+# Ollama (로컬)
 OLLAMA_URL = _cfg.get("ollama", "url", fallback="http://127.0.0.1:11434")
 OLLAMA_MODEL = _cfg.get("ollama", "model", fallback="gemma4:26b")
+# Ollama (원격 — spark 서버, Vision API 프록시용)
+OLLAMA_REMOTE_URL = _cfg.get("ollama", "remote_url", fallback="http://192.168.10.104:11435")
+OLLAMA_REMOTE_MODEL = _cfg.get("ollama", "remote_model", fallback="qwen3.6:35b-a3b")
 
 # OpenAI
 OPENAI_API_KEY = _cfg.get("openai", "api_key", fallback="")
