@@ -276,7 +276,7 @@ def ocr_cells_with_engine(cell_images: dict, engine: str, api_url: str, api_key:
         prompt = f"""The following {len(batch_ids)} images are cropped cells from a document.
 Read the handwritten text in each cell. If empty, return empty string.
 Ignore printed labels or fixed text. Read only handwritten parts.
-If a cell contains a shape that looks closer to O, return "○". If it looks closer to X, return "×".
+If a cell has a handwritten mark that looks closer to O, return "○". If closer to X, return "×". If the cell is empty or has no handwriting, return "".
 
 Return in JSON format only. No explanations or markdown.
 Images correspond to {json.dumps(batch_ids)} in order.
