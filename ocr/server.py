@@ -276,6 +276,7 @@ def ocr_cells_with_engine(cell_images: dict, engine: str, api_url: str, api_key:
         prompt = f"""The following {len(batch_ids)} images are cropped cells from a document.
 Read the handwritten text in each cell. If empty, return empty string.
 Ignore printed labels or fixed text. Read only handwritten parts.
+If a cell contains a circle mark (○/〇/O) or cross mark (×/✗/X), return exactly "○" or "×".
 
 Return in JSON format only. No explanations or markdown.
 Images correspond to {json.dumps(batch_ids)} in order.
@@ -492,7 +493,7 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
                                 "engine": engine_map.get(pi.get("ocrType", ""), pi.get("ocrType", "openai")),
                                 "api_url": pi.get("apiUrl", "https://api.openai.com"),
                                 "api_key": pi.get("apiKey", ""),
-                                "model": pi.get("model", "gpt-5.6-luna"),
+                                "model": pi.get("model", "gpt-5.6-terra"),
                             }
                             prompt_from_settings = pi.get("prompt", "")
                             logger.info(f"promptInfo JSON에서 OCR 설정 추출: engine={ocr_settings['engine']}, model={ocr_settings['model']}, apiKey={'있음' if ocr_settings['api_key'] else '없음'}")
