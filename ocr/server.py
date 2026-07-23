@@ -196,11 +196,15 @@ def ocr_with_openai(images: list[str], prompt: str, api_url: str, api_key: str, 
     content = [{"type": "text", "text": prompt}]
     for b64_img in images:
         content.append({"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64_img}"}})
-    response = client.chat.completions.create(
-        model=model,
-        messages=[{"role": "user", "content": content}],
-        max_tokens=config.DEFAULT_MAX_TOKENS,
-    )
+    kwargs = {
+        "model": model,
+        "messages": [{"role": "user", "content": content}],
+    }
+    if model.startswith("o") or model.startswith("gpt-5"):
+        kwargs["max_completion_tokens"] = config.DEFAULT_MAX_TOKENS
+    else:
+        kwargs["max_tokens"] = config.DEFAULT_MAX_TOKENS
+    response = client.chat.completions.create(**kwargs)
     return response.choices[0].message.content
 
 
@@ -488,7 +492,7 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
                                 "engine": engine_map.get(pi.get("ocrType", ""), pi.get("ocrType", "openai")),
                                 "api_url": pi.get("apiUrl", "https://api.openai.com"),
                                 "api_key": pi.get("apiKey", ""),
-                                "model": pi.get("model", "gpt-4o"),
+                                "model": pi.get("model", "gpt-5.6-luna"),
                             }
                             prompt_from_settings = pi.get("prompt", "")
                             logger.info(f"promptInfo JSON에서 OCR 설정 추출: engine={ocr_settings['engine']}, model={ocr_settings['model']}, apiKey={'있음' if ocr_settings['api_key'] else '없음'}")
@@ -501,7 +505,7 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
                         "engine": form_info.get("ocrEngine") or "openai",
                         "api_url": form_info.get("ocrApiUrl") or "https://api.openai.com",
                         "api_key": form_info.get("ocrApiKey") or "",
-                        "model": form_info.get("ocrModel") or "gpt-4o",
+                        "model": form_info.get("ocrModel") or "gpt-5.6-luna",
                     }
             except Exception as e:
                 logger.warning(f"폼 정보 조회 실패: {e}")
