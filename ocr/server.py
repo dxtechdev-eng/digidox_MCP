@@ -44,8 +44,9 @@ YAMATO_DIR = os.path.join(BASE_DIR, "yamato")
 ITSUWA_DIR = os.path.join(BASE_DIR, "itsuwa")
 DEMOSHEET_VT_DIR = os.path.join(BASE_DIR, "demosheet_vt")
 THERMO_DIR = os.path.join(BASE_DIR, "thermofisher")
+COMMON_DIR = os.path.join(BASE_DIR, "common")
 
-for name, d in [("viewer", VIEWER_DIR), ("yamato", YAMATO_DIR), ("itsuwa", ITSUWA_DIR),
+for name, d in [("common", COMMON_DIR), ("viewer", VIEWER_DIR), ("yamato", YAMATO_DIR), ("itsuwa", ITSUWA_DIR),
                 ("demosheet_vt", DEMOSHEET_VT_DIR), ("thermofisher", THERMO_DIR)]:
     static_dir = os.path.join(d, "static")
     if os.path.exists(static_dir):
