@@ -623,34 +623,6 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
         }
 
 
-@app.post("/api/generate-prompt")
-async def generate_prompt(request: Request):
-    body = await request.body()
-    params = json.loads(body)
-    formid = params.get("formid")
-    lang = params.get("lang", "ja")
-
-    logger.info(f"프롬프트 생성 요청: formid={formid}, lang={lang}")
-
-    try:
-        form_info = get_form_info(formid)
-        fields_by_page = extract_fields_by_page(form_info)
-        all_fields = []
-        for page_no in sorted(fields_by_page.keys()):
-            all_fields.extend(fields_by_page[page_no])
-
-        if not all_fields:
-            return {"resultCode": "400", "resultMsg": "No fields found", "promptInfo": ""}
-
-        prompt = build_auto_prompt(all_fields, lang, form_info.get("formName", ""))
-        logger.info(f"프롬프트 생성 완료: {len(prompt)}자")
-        return {"resultCode": "200", "resultMsg": "OK", "formid": formid, "promptInfo": prompt}
-
-    except Exception as e:
-        logger.error(f"프롬프트 생성 실패: {e}", exc_info=True)
-        return {"resultCode": "500", "resultMsg": str(e), "promptInfo": ""}
-
-
 @app.post("/api/save")
 async def save_ocr(request: Request):
     body = await request.body()
