@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <title>AI OCR - Phối hàng siêu thị (Supermarket Report)</title>
+    <link rel="stylesheet" href="/common/static/css/base.css">
+    <link rel="stylesheet" href="/vt_supermarket/static/css/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>AI OCR Viewer - Phối hàng siêu thị (Supermarket Report)</h1>
+        <div class="header-info">
+            <span id="docInfo"></span>
+            <div class="header-actions">
+                <button id="rerunBtn" onclick="rerunOcr()">Re-Scan</button>
+
+                <button onclick="clearForm()">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="panel panel-left">
+            <div class="panel-header"><span>Original</span></div>
+            <div class="image-viewer">
+                <img id="docImage" src="" alt="Document" />
+            </div>
+        </div>
+
+        <div class="panel panel-right">
+            <div class="panel-header"><span>OCR Result</span></div>
+            <div class="form-viewer">
+                <!-- Header -->
+                <table class="form-table">
+                    <thead>
+                        <tr><th colspan="6" class="section-header">Thông tin chung (Worker Info)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="label-cell">MÃ SỐ THẺ</th>
+                            <td><input type="text" id="MA_SO_THE" class="form-input"></td>
+                            <th class="label-cell">HỌ VÀ TÊN</th>
+                            <td><input type="text" id="HO_TEN" class="form-input"></td>
+                            <th class="label-cell">NGÀY</th>
+                            <td><input type="text" id="NGAY" class="form-input"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Supermarket grid -->
+                <div class="table-scroll">
+                <table class="form-table grid-table">
+                    <thead>
+                        <tr><th colspan="8" class="section-header">Phối hàng (Distribution)</th></tr>
+                        <tr>
+                            <th class="label-cell">STT</th>
+                            <th class="label-cell">MÃ HÀNG</th>
+                            <th class="label-cell">LOẠI VẢI</th>
+                            <th class="label-cell">SỐ FILE</th>
+                            <th class="label-cell">MÀU</th>
+                            <th class="label-cell">SỐ THỨ TỰ BÓ</th>
+                            <th class="label-cell">SỐ LỚP/BÓ</th>
+                            <th class="label-cell">SỐ SIZE/XE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="label-cell">1</th>
+                            <td><input type="text" id="MA_HANG.01" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.01" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.01" class="form-input"></td>
+                            <td><input type="text" id="MAU.01" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.01" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.01" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.01" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">2</th>
+                            <td><input type="text" id="MA_HANG.02" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.02" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.02" class="form-input"></td>
+                            <td><input type="text" id="MAU.02" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.02" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.02" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.02" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">3</th>
+                            <td><input type="text" id="MA_HANG.03" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.03" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.03" class="form-input"></td>
+                            <td><input type="text" id="MAU.03" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.03" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.03" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.03" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">4</th>
+                            <td><input type="text" id="MA_HANG.04" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.04" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.04" class="form-input"></td>
+                            <td><input type="text" id="MAU.04" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.04" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.04" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.04" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">5</th>
+                            <td><input type="text" id="MA_HANG.05" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.05" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.05" class="form-input"></td>
+                            <td><input type="text" id="MAU.05" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.05" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.05" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.05" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">6</th>
+                            <td><input type="text" id="MA_HANG.06" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.06" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.06" class="form-input"></td>
+                            <td><input type="text" id="MAU.06" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.06" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.06" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.06" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">7</th>
+                            <td><input type="text" id="MA_HANG.07" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.07" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.07" class="form-input"></td>
+                            <td><input type="text" id="MAU.07" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.07" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.07" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.07" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">8</th>
+                            <td><input type="text" id="MA_HANG.08" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.08" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.08" class="form-input"></td>
+                            <td><input type="text" id="MAU.08" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.08" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.08" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.08" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">9</th>
+                            <td><input type="text" id="MA_HANG.09" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.09" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.09" class="form-input"></td>
+                            <td><input type="text" id="MAU.09" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.09" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.09" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.09" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">10</th>
+                            <td><input type="text" id="MA_HANG.10" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.10" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.10" class="form-input"></td>
+                            <td><input type="text" id="MAU.10" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.10" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.10" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.10" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">11</th>
+                            <td><input type="text" id="MA_HANG.11" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.11" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.11" class="form-input"></td>
+                            <td><input type="text" id="MAU.11" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.11" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.11" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.11" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">12</th>
+                            <td><input type="text" id="MA_HANG.12" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.12" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.12" class="form-input"></td>
+                            <td><input type="text" id="MAU.12" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.12" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.12" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.12" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">13</th>
+                            <td><input type="text" id="MA_HANG.13" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.13" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.13" class="form-input"></td>
+                            <td><input type="text" id="MAU.13" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.13" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.13" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.13" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">14</th>
+                            <td><input type="text" id="MA_HANG.14" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.14" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.14" class="form-input"></td>
+                            <td><input type="text" id="MAU.14" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.14" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.14" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.14" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">15</th>
+                            <td><input type="text" id="MA_HANG.15" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.15" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.15" class="form-input"></td>
+                            <td><input type="text" id="MAU.15" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.15" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.15" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.15" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">16</th>
+                            <td><input type="text" id="MA_HANG.16" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.16" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.16" class="form-input"></td>
+                            <td><input type="text" id="MAU.16" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.16" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.16" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.16" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">17</th>
+                            <td><input type="text" id="MA_HANG.17" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.17" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.17" class="form-input"></td>
+                            <td><input type="text" id="MAU.17" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.17" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.17" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.17" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">18</th>
+                            <td><input type="text" id="MA_HANG.18" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.18" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.18" class="form-input"></td>
+                            <td><input type="text" id="MAU.18" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.18" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.18" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.18" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">19</th>
+                            <td><input type="text" id="MA_HANG.19" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.19" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.19" class="form-input"></td>
+                            <td><input type="text" id="MAU.19" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.19" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.19" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.19" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">20</th>
+                            <td><input type="text" id="MA_HANG.20" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.20" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.20" class="form-input"></td>
+                            <td><input type="text" id="MAU.20" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.20" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.20" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.20" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">21</th>
+                            <td><input type="text" id="MA_HANG.21" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.21" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.21" class="form-input"></td>
+                            <td><input type="text" id="MAU.21" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.21" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.21" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.21" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">22</th>
+                            <td><input type="text" id="MA_HANG.22" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.22" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.22" class="form-input"></td>
+                            <td><input type="text" id="MAU.22" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.22" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.22" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.22" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">23</th>
+                            <td><input type="text" id="MA_HANG.23" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.23" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.23" class="form-input"></td>
+                            <td><input type="text" id="MAU.23" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.23" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.23" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.23" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">24</th>
+                            <td><input type="text" id="MA_HANG.24" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.24" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.24" class="form-input"></td>
+                            <td><input type="text" id="MAU.24" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.24" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.24" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.24" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">25</th>
+                            <td><input type="text" id="MA_HANG.25" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.25" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.25" class="form-input"></td>
+                            <td><input type="text" id="MAU.25" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.25" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.25" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.25" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">26</th>
+                            <td><input type="text" id="MA_HANG.26" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.26" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.26" class="form-input"></td>
+                            <td><input type="text" id="MAU.26" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.26" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.26" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.26" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">27</th>
+                            <td><input type="text" id="MA_HANG.27" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.27" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.27" class="form-input"></td>
+                            <td><input type="text" id="MAU.27" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.27" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.27" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.27" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">28</th>
+                            <td><input type="text" id="MA_HANG.28" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.28" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.28" class="form-input"></td>
+                            <td><input type="text" id="MAU.28" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.28" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.28" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.28" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">29</th>
+                            <td><input type="text" id="MA_HANG.29" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.29" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.29" class="form-input"></td>
+                            <td><input type="text" id="MAU.29" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.29" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.29" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.29" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">30</th>
+                            <td><input type="text" id="MA_HANG.30" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.30" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.30" class="form-input"></td>
+                            <td><input type="text" id="MAU.30" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.30" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.30" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.30" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">31</th>
+                            <td><input type="text" id="MA_HANG.31" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.31" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.31" class="form-input"></td>
+                            <td><input type="text" id="MAU.31" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.31" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.31" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.31" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">32</th>
+                            <td><input type="text" id="MA_HANG.32" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.32" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.32" class="form-input"></td>
+                            <td><input type="text" id="MAU.32" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.32" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.32" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.32" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">33</th>
+                            <td><input type="text" id="MA_HANG.33" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.33" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.33" class="form-input"></td>
+                            <td><input type="text" id="MAU.33" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.33" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.33" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.33" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">34</th>
+                            <td><input type="text" id="MA_HANG.34" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.34" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.34" class="form-input"></td>
+                            <td><input type="text" id="MAU.34" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.34" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.34" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.34" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">35</th>
+                            <td><input type="text" id="MA_HANG.35" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.35" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.35" class="form-input"></td>
+                            <td><input type="text" id="MAU.35" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.35" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.35" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.35" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">36</th>
+                            <td><input type="text" id="MA_HANG.36" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.36" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.36" class="form-input"></td>
+                            <td><input type="text" id="MAU.36" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.36" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.36" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.36" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">37</th>
+                            <td><input type="text" id="MA_HANG.37" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.37" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.37" class="form-input"></td>
+                            <td><input type="text" id="MAU.37" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.37" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.37" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.37" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">38</th>
+                            <td><input type="text" id="MA_HANG.38" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.38" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.38" class="form-input"></td>
+                            <td><input type="text" id="MAU.38" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.38" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.38" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.38" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">39</th>
+                            <td><input type="text" id="MA_HANG.39" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.39" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.39" class="form-input"></td>
+                            <td><input type="text" id="MAU.39" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.39" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.39" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.39" class="form-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell">40</th>
+                            <td><input type="text" id="MA_HANG.40" class="form-input"></td>
+                            <td><input type="text" id="LOAI_VAI.40" class="form-input"></td>
+                            <td><input type="text" id="SO_FILE.40" class="form-input"></td>
+                            <td><input type="text" id="MAU.40" class="form-input"></td>
+                            <td><input type="text" id="SO_TT_BO.40" class="form-input"></td>
+                            <td><input type="text" id="SO_LOP_BO.40" class="form-input"></td>
+                            <td><input type="text" id="SO_SIZE_XE.40" class="form-input"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <!-- Note -->
+                <p class="form-note">LƯU Ý: Trường hợp lên chuyền, so màu, sửa hàng hư, phụ kho,.. thì vui lòng ghi chú lại thời gian.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-box">
+            <div class="spinner"></div>
+            <p>OCR Processing...</p>
+        </div>
+    </div>
+
+    <script src="/common/static/js/base.js"></script>
+    <script src="/vt_supermarket/static/js/app.js"></script>
+</body>
+</html>

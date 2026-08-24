@@ -45,9 +45,14 @@ ITSUWA_DIR = os.path.join(BASE_DIR, "itsuwa")
 DEMOSHEET_VT_DIR = os.path.join(BASE_DIR, "demosheet_vt")
 THERMO_DIR = os.path.join(BASE_DIR, "thermofisher")
 COMMON_DIR = os.path.join(BASE_DIR, "common")
+VT_ATTENDANCE_DIR = os.path.join(BASE_DIR, "vt_attendance")
+VT_NUMBERING_DIR = os.path.join(BASE_DIR, "vt_numbering")
+VT_SUPERMARKET_DIR = os.path.join(BASE_DIR, "vt_supermarket")
 
 for name, d in [("common", COMMON_DIR), ("viewer", VIEWER_DIR), ("yamato", YAMATO_DIR), ("itsuwa", ITSUWA_DIR),
-                ("demosheet_vt", DEMOSHEET_VT_DIR), ("thermofisher", THERMO_DIR)]:
+                ("demosheet_vt", DEMOSHEET_VT_DIR), ("thermofisher", THERMO_DIR),
+                ("vt_attendance", VT_ATTENDANCE_DIR), ("vt_numbering", VT_NUMBERING_DIR),
+                ("vt_supermarket", VT_SUPERMARKET_DIR)]:
     static_dir = os.path.join(d, "static")
     if os.path.exists(static_dir):
         app.mount(f"/{name}/static", StaticFiles(directory=static_dir), name=f"{name}_static")
@@ -61,6 +66,9 @@ FORMID_TEMPLATE_MAP = {
     "TM": "thermofisher",
     "ITSUWA": "itsuwa",
     "DEMO_SHEET_VT": "demosheet_vt",
+    "HANSE_ATTENDANCE": "vt_attendance",
+    "HANSE_NUMBERING": "vt_numbering",
+    "HANSE_SUPERMARKET": "vt_supermarket",
 }
 
 # PoC formid 목록 (API 키 fallback 대상)
@@ -714,6 +722,9 @@ async def viewer(request: Request):
         "itsuwa": ITSUWA_DIR,
         "demosheet_vt": DEMOSHEET_VT_DIR,
         "thermofisher": THERMO_DIR,
+        "vt_attendance": VT_ATTENDANCE_DIR,
+        "vt_numbering": VT_NUMBERING_DIR,
+        "vt_supermarket": VT_SUPERMARKET_DIR,
         "overlay": VIEWER_DIR,
     }
     tdir = template_dirs.get(template_type, VIEWER_DIR)

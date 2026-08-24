@@ -1,0 +1,10 @@
+/* Grid-table overrides for wide row-based forms (base.css handles common styles) */
+
+.table-scroll { overflow-x: auto; }
+
+.grid-table .form-input { min-width: 52px; padding: 4px 6px; font-size: 13px; }
+.grid-table td, .grid-table th { padding: 2px 4px; }
+.grid-table .day-input { min-width: 44px; text-align: center; }
+.grid-table .date-input { min-width: 60px; font-weight: normal; }
+
+.form-note { margin: 8px 2px; font-size: 12px; color: #888; }
