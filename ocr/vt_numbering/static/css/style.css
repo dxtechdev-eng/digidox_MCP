@@ -8,3 +8,6 @@
 .grid-table .date-input { min-width: 60px; font-weight: normal; }
 
 .form-note { margin: 8px 2px; font-size: 12px; color: #888; }
+
+/* 가로형 A4: TI LE SO DO 열이 타 열의 3~3.5배 폭 */
+.grid-table .wide-input { min-width: 190px; }
