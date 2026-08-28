@@ -31,113 +31,56 @@
         <div class="panel panel-right">
             <div class="panel-header"><span>OCR Result</span></div>
             <div class="form-viewer">
-                <!-- Header -->
-                <table class="form-table">
-                    <thead>
-                        <tr><th colspan="4" class="section-header">Thông tin chung (Line Info)</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <th class="label-cell">LINE</th>
-                            <td><input type="text" id="LINE_NAME" class="form-input"></td>
-                            <th class="label-cell">HANGER</th>
-                            <td><input type="text" id="HANGER_INFO" class="form-input"></td>
-                        </tr>
-                    </tbody>
-                </table>
-
                 <!-- Attendance grid -->
                 <div class="table-scroll">
                 <table class="form-table grid-table">
                     <thead>
-                        <tr><th colspan="10" class="section-header">Bảng chấm công (Attendance)</th></tr>
+                        <tr><th colspan="9" class="section-header">Bảng chấm công (Attendance) — 손글씨 기입칸만 인식</th></tr>
                         <tr>
                             <th class="label-cell">STT</th>
                             <th class="label-cell">MÃ SỐ</th>
                             <th class="label-cell">HỌ VÀ TÊN</th>
-                            <th class="label-cell"><input type="text" id="DATE.01" class="form-input date-input"></th>
-                            <th class="label-cell"><input type="text" id="DATE.02" class="form-input date-input"></th>
-                            <th class="label-cell"><input type="text" id="DATE.03" class="form-input date-input"></th>
-                            <th class="label-cell"><input type="text" id="DATE.04" class="form-input date-input"></th>
-                            <th class="label-cell"><input type="text" id="DATE.05" class="form-input date-input"></th>
-                            <th class="label-cell"><input type="text" id="DATE.06" class="form-input date-input"></th>
-                            <th class="label-cell">GHI CHÚ</th>
+                            <th class="label-cell">03-Feb</th><th class="label-cell">04-Feb</th><th class="label-cell">05-Feb</th><th class="label-cell">06-Feb</th><th class="label-cell">07-Feb</th><th class="label-cell">08-Feb</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
+                            <th class="label-cell"></th>
+                            <td class="static-cell">013482</td>
+                            <td class="static-cell">BÙI CÔNG TUẤN</td>
+                            <td><input type="text" id="A_1" class="form-input day-input"></td><td><input type="text" id="B_1" class="form-input day-input"></td><td><input type="text" id="C_1" class="form-input day-input"></td><td><input type="text" id="D_1" class="form-input day-input"></td><td><input type="text" id="E_1" class="form-input day-input"></td><td><input type="text" id="F_1" class="form-input day-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell"></th>
+                            <td class="static-cell">016943</td>
+                            <td class="static-cell">VĂN THỊ MỘNG TUYỀN</td>
+                            <td><input type="text" id="A_2" class="form-input day-input"></td><td><input type="text" id="B_2" class="form-input day-input"></td><td><input type="text" id="C_2" class="form-input day-input"></td><td><input type="text" id="D_2" class="form-input day-input"></td><td><input type="text" id="E_2" class="form-input day-input"></td><td><input type="text" id="F_2" class="form-input day-input"></td>
+                        </tr>
+                        <tr>
+                            <th class="label-cell"></th>
+                            <td class="static-cell">005598</td>
+                            <td class="static-cell">NGUYỄN THỊ NGỌC HÂN</td>
+                            <td><input type="text" id="A_3" class="form-input day-input"></td><td><input type="text" id="B_3" class="form-input day-input"></td><td><input type="text" id="C_3" class="form-input day-input"></td><td><input type="text" id="D_3" class="form-input day-input"></td><td><input type="text" id="E_3" class="form-input day-input"></td><td><input type="text" id="F_3" class="form-input day-input"></td>
+                        </tr>
+                        <tr>
                             <th class="label-cell">1</th>
-                            <td><input type="text" id="MA_SO.01" class="form-input"></td>
-                            <td><input type="text" id="HO_TEN.01" class="form-input"></td>
-                            <td><input type="text" id="A_1" class="form-input day-input"></td>
-                            <td><input type="text" id="B_1" class="form-input day-input"></td>
-                            <td><input type="text" id="C_1" class="form-input day-input"></td>
-                            <td><input type="text" id="D_1" class="form-input day-input"></td>
-                            <td><input type="text" id="E_1" class="form-input day-input"></td>
-                            <td><input type="text" id="F_1" class="form-input day-input"></td>
-                            <td><input type="text" id="GHI_CHU.01" class="form-input"></td>
+                            <td class="static-cell">017502</td>
+                            <td class="static-cell">NGUYỄN VĂN MINH</td>
+                            <td><input type="text" id="A_4" class="form-input day-input"></td><td><input type="text" id="B_4" class="form-input day-input"></td><td><input type="text" id="C_4" class="form-input day-input"></td><td><input type="text" id="D_4" class="form-input day-input"></td><td><input type="text" id="E_4" class="form-input day-input"></td><td><input type="text" id="F_4" class="form-input day-input"></td>
                         </tr>
                         <tr>
                             <th class="label-cell">2</th>
-                            <td><input type="text" id="MA_SO.02" class="form-input"></td>
-                            <td><input type="text" id="HO_TEN.02" class="form-input"></td>
-                            <td><input type="text" id="A_2" class="form-input day-input"></td>
-                            <td><input type="text" id="B_2" class="form-input day-input"></td>
-                            <td><input type="text" id="C_2" class="form-input day-input"></td>
-                            <td><input type="text" id="D_2" class="form-input day-input"></td>
-                            <td><input type="text" id="E_2" class="form-input day-input"></td>
-                            <td><input type="text" id="F_2" class="form-input day-input"></td>
-                            <td><input type="text" id="GHI_CHU.02" class="form-input"></td>
+                            <td class="static-cell">002665</td>
+                            <td class="static-cell">LÊ THỊ NGỌC ĐIỆP</td>
+                            <td><input type="text" id="A_5" class="form-input day-input"></td><td><input type="text" id="B_5" class="form-input day-input"></td><td><input type="text" id="C_5" class="form-input day-input"></td><td><input type="text" id="D_5" class="form-input day-input"></td><td><input type="text" id="E_5" class="form-input day-input"></td><td><input type="text" id="F_5" class="form-input day-input"></td>
                         </tr>
                         <tr>
                             <th class="label-cell">3</th>
-                            <td><input type="text" id="MA_SO.03" class="form-input"></td>
-                            <td><input type="text" id="HO_TEN.03" class="form-input"></td>
-                            <td><input type="text" id="A_3" class="form-input day-input"></td>
-                            <td><input type="text" id="B_3" class="form-input day-input"></td>
-                            <td><input type="text" id="C_3" class="form-input day-input"></td>
-                            <td><input type="text" id="D_3" class="form-input day-input"></td>
-                            <td><input type="text" id="E_3" class="form-input day-input"></td>
-                            <td><input type="text" id="F_3" class="form-input day-input"></td>
-                            <td><input type="text" id="GHI_CHU.03" class="form-input"></td>
+                            <td class="static-cell">014202</td>
+                            <td class="static-cell">NGUYỄN THỊ MỸ HẰNG</td>
+                            <td><input type="text" id="A_6" class="form-input day-input"></td><td><input type="text" id="B_6" class="form-input day-input"></td><td><input type="text" id="C_6" class="form-input day-input"></td><td><input type="text" id="D_6" class="form-input day-input"></td><td><input type="text" id="E_6" class="form-input day-input"></td><td><input type="text" id="F_6" class="form-input day-input"></td>
                         </tr>
-                        <tr>
-                            <th class="label-cell">4</th>
-                            <td><input type="text" id="MA_SO.04" class="form-input"></td>
-                            <td><input type="text" id="HO_TEN.04" class="form-input"></td>
-                            <td><input type="text" id="A_4" class="form-input day-input"></td>
-                            <td><input type="text" id="B_4" class="form-input day-input"></td>
-                            <td><input type="text" id="C_4" class="form-input day-input"></td>
-                            <td><input type="text" id="D_4" class="form-input day-input"></td>
-                            <td><input type="text" id="E_4" class="form-input day-input"></td>
-                            <td><input type="text" id="F_4" class="form-input day-input"></td>
-                            <td><input type="text" id="GHI_CHU.04" class="form-input"></td>
-                        </tr>
-                        <tr>
-                            <th class="label-cell">5</th>
-                            <td><input type="text" id="MA_SO.05" class="form-input"></td>
-                            <td><input type="text" id="HO_TEN.05" class="form-input"></td>
-                            <td><input type="text" id="A_5" class="form-input day-input"></td>
-                            <td><input type="text" id="B_5" class="form-input day-input"></td>
-                            <td><input type="text" id="C_5" class="form-input day-input"></td>
-                            <td><input type="text" id="D_5" class="form-input day-input"></td>
-                            <td><input type="text" id="E_5" class="form-input day-input"></td>
-                            <td><input type="text" id="F_5" class="form-input day-input"></td>
-                            <td><input type="text" id="GHI_CHU.05" class="form-input"></td>
-                        </tr>
-                        <tr>
-                            <th class="label-cell">6</th>
-                            <td><input type="text" id="MA_SO.06" class="form-input"></td>
-                            <td><input type="text" id="HO_TEN.06" class="form-input"></td>
-                            <td><input type="text" id="A_6" class="form-input day-input"></td>
-                            <td><input type="text" id="B_6" class="form-input day-input"></td>
-                            <td><input type="text" id="C_6" class="form-input day-input"></td>
-                            <td><input type="text" id="D_6" class="form-input day-input"></td>
-                            <td><input type="text" id="E_6" class="form-input day-input"></td>
-                            <td><input type="text" id="F_6" class="form-input day-input"></td>
-                            <td><input type="text" id="GHI_CHU.06" class="form-input"></td>
-                        </tr>
-                        </tbody>
+                    </tbody>
                 </table>
                 </div>
             </div>

@@ -1,26 +1,15 @@
-/* VT Attendance-specific: fillForm only (base.js handles common functions) */
+/* VT Attendance: fillForm only — 손글씨 기입 그리드(A_1~F_6)만 인식 대상 */
 
 function fillForm(ocrResult) {
     var data = parseOcrJson(ocrResult);
     if (!data) return;
     lastOcrData = data;
 
-    var textFields = ['LINE_NAME', 'HANGER_INFO'];
-
-    for (var c = 1; c <= 6; c++) {
-        textFields.push('DATE.' + (c < 10 ? '0' + c : '' + c));
-    }
-
-    for (var r = 1; r <= 6; r++) {   // PoC: 상단 6행만 등록됨
-        var n = r < 10 ? '0' + r : '' + r;
-        textFields.push('MA_SO.' + n, 'HO_TEN.' + n, 'GHI_CHU.' + n);
-        for (var c = 1; c <= 6; c++) {
-            textFields.push('ABCDEF'[c - 1] + '_' + r);   // 날짜 그리드: 열문자_행번호 (엑셀식, DigiDox 등록 체계)
+    for (var r = 1; r <= 6; r++) {
+        for (var c = 0; c < 6; c++) {
+            var id = 'ABCDEF'[c] + '_' + r;
+            var el = document.getElementById(id);
+            if (el && data[id] !== undefined) el.value = data[id];
         }
     }
-
-    textFields.forEach(function(id) {
-        var el = document.getElementById(id);
-        if (el && data[id] !== undefined) el.value = data[id];
-    });
 }
