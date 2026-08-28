@@ -67,8 +67,8 @@ FORMID_TEMPLATE_MAP = {
     "ITSUWA": "itsuwa",
     "DEMO_SHEET_VT": "demosheet_vt",
     "HANSE_ATTENDANCE": "vt_attendance",
-    "HANSE_NUMBERING": "vt_numbering",
-    "HANSE_SUPERMARKET": "vt_supermarket",
+    "HANSE_NUMBERING": "overlay",
+    "HANSE_SUPERMARKET": "overlay",
 }
 
 # PoC formid 목록 (API 키 fallback 대상)
@@ -95,8 +95,32 @@ async def log_all_requests(request: Request, call_next):
     response = await call_next(request)
     return response
 
-# OCR 결과 캐시 (seq → 결과)
-ocr_cache = {}
+# OCR 결과 캐시 (seq → 결과) + 사용자 수정본 (seq → {field: value})
+# 디스크 영속화: 서버 재시작 후에도 저장된 인식 결과·수정 내용 유지
+STORE_DIR = os.path.join(BASE_DIR, "store")
+os.makedirs(STORE_DIR, exist_ok=True)
+_CACHE_PATH = os.path.join(STORE_DIR, "ocr_cache.json")
+_EDITS_PATH = os.path.join(STORE_DIR, "edits.json")
+
+
+def _load_json(path):
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _dump_json(path, obj):
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(obj, f, ensure_ascii=False)
+    except Exception as e:
+        logger.error(f"store 저장 실패 {path}: {e}")
+
+
+ocr_cache = _load_json(_CACHE_PATH)
+edits_store = _load_json(_EDITS_PATH)
 
 
 # ============================================================
@@ -480,6 +504,7 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
             "formid": formid,
             "pages": cached["pages"],
             "ocrResult": cached["ocrResult"],
+            "edits": edits_store.get(seq, {}),
         }
 
     try:
@@ -607,6 +632,7 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
         logger.info(f"[OCR 완료] seq={seq}, 소요시간={elapsed}초, 시각={time.strftime('%Y-%m-%d %H:%M:%S')}\n--- OCR 결과 ---\n{ocr_text}\n--- 끝 ---")
 
         ocr_cache[seq] = {"pages": page_count, "ocrResult": ocr_text}
+        _dump_json(_CACHE_PATH, ocr_cache)
 
         return {
             "resultCode": "200",
@@ -615,6 +641,7 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
             "formid": formid,
             "pages": page_count,
             "ocrResult": ocr_text,
+            "edits": edits_store.get(seq, {}),
             "elapsed": elapsed,
         }
 
@@ -638,13 +665,19 @@ async def save_ocr(request: Request):
     seq = params.get("seq")
     formid = params.get("formid")
     ocr_data = params.get("ocrData")
+    edited = params.get("editedFields") or {}
 
-    logger.info(f"저장 요청: seq={seq}, formid={formid}")
+    logger.info(f"저장 요청: seq={seq}, formid={formid}, 수정필드={len(edited)}개")
 
     try:
+        # 사용자가 손댄 필드는 별도 보관 — 이후 OCR 재처리가 덮어쓰지 못함
+        if edited:
+            cur = edits_store.setdefault(seq, {})
+            cur.update(edited)
+            _dump_json(_EDITS_PATH, edits_store)
         form_info = get_form_info(formid)
         save_ocr_result(seq, ocr_data, form_info)
-        return {"resultCode": "200", "resultMsg": "Saved"}
+        return {"resultCode": "200", "resultMsg": "Saved", "protectedFields": len(edits_store.get(seq, {}))}
     except Exception as e:
         logger.error(f"저장 실패: {e}", exc_info=True)
         return {"resultCode": "500", "resultMsg": str(e)}

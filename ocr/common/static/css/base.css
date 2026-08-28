@@ -211,3 +211,6 @@ td:has(.suffix) .form-input { width: calc(100% - 20px); display: inline-block; }
     margin: 0 auto;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* 사용자 수정 필드 — OCR 재처리로부터 보호됨 */
+.form-input.user-edited { background: #fff7d6; border-color: #d4a017; }

@@ -8,6 +8,30 @@ var formid = null;
 var totalPages = 1;
 var currentPage = 0;
 var lastOcrData = null;
+var userEdits = {};      // 서버 보관 사용자 수정본
+var dirtyFields = {};    // 이번 세션 수정분
+
+function applyEdits(edits) {
+    userEdits = edits || {};
+    var merged = Object.assign({}, userEdits, dirtyFields);
+    for (var fid in merged) {
+        var el = document.getElementById(fid);
+        if (el) {
+            if (el.type === 'checkbox') el.checked = merged[fid] === '✓';
+            else el.value = merged[fid];
+            el.classList.add('user-edited');
+        }
+    }
+}
+
+document.addEventListener('change', function(ev) {
+    var el = ev.target;
+    if (!el.id) return;
+    if (el.classList.contains('form-input') || el.type === 'checkbox') {
+        dirtyFields[el.id] = el.type === 'checkbox' ? (el.checked ? '✓' : '') : el.value;
+        el.classList.add('user-edited');
+    }
+});
 
 if (key) {
     try {
@@ -49,6 +73,7 @@ async function runOcr(force) {
         if (data.resultCode === '200') {
             totalPages = data.pages || 1;
             fillForm(data.ocrResult);
+            applyEdits(data.edits);   // 사용자 수정본이 OCR 결과를 덮음 (보호)
         } else {
             alert('OCR error: ' + data.resultMsg);
         }
@@ -96,11 +121,13 @@ async function saveResult() {
         var res = await fetch('/api/save', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ seq: seq, formid: formid, ocrData: ocrData })
+            body: JSON.stringify({ seq: seq, formid: formid, ocrData: ocrData, editedFields: dirtyFields })
         });
         var data = await res.json();
         if (data.resultCode === '200') {
-            alert('Saved successfully.');
+            Object.assign(userEdits, dirtyFields);
+            dirtyFields = {};
+            alert('저장되었습니다. (보호 필드 ' + (data.protectedFields || 0) + '개)');
         } else {
             alert('Save failed: ' + data.resultMsg);
         }

@@ -6,6 +6,8 @@ var formid = null;
 var formWidth = 700;
 var formHeight = 990;
 var fieldPositions = {};
+var userEdits = {};      // 서버 보관된 사용자 수정본 (OCR이 덮지 못함)
+var dirtyFields = {};    // 이번 세션에서 손댄 필드
 
 if (key) {
     try {
@@ -71,6 +73,7 @@ async function runOcr(force) {
         var data = await res.json();
 
         if (data.resultCode === '200') {
+            userEdits = data.edits || {};
             applyOcrResult(data.ocrResult);
         } else {
             alert('OCR error: ' + data.resultMsg);
@@ -123,6 +126,9 @@ function renderOverlays() {
         if (!info.left && info.left !== 0) continue;
 
         var value = data[fid] !== undefined ? data[fid] : '';
+        var edited = false;
+        if (dirtyFields[fid] !== undefined) { value = dirtyFields[fid]; edited = true; }
+        else if (userEdits[fid] !== undefined) { value = userEdits[fid]; edited = true; }
 
         var div = document.createElement('div');
         div.className = 'ocr-overlay';
@@ -135,7 +141,14 @@ function renderOverlays() {
         input.type = 'text';
         input.value = value;
         input.id = 'field_' + fid;
-        input.title = fid;
+        input.title = fid + (edited ? ' (수정됨 — OCR이 덮어쓰지 않음)' : '');
+        if (edited) input.classList.add('user-edited');
+        input.addEventListener('change', (function(f) {
+            return function(ev) {
+                dirtyFields[f] = ev.target.value;
+                ev.target.classList.add('user-edited');
+            };
+        })(fid));
         div.appendChild(input);
 
         layer.appendChild(div);
@@ -144,6 +157,31 @@ function renderOverlays() {
 
 function rerunOcr() {
     runOcr(true);
+}
+
+async function saveResult() {
+    var ocrData = {};
+    document.querySelectorAll('#overlayLayer input').forEach(function(input) {
+        if (input.id && input.id.indexOf('field_') === 0) {
+            ocrData[input.id.substring(6)] = input.value;
+        }
+    });
+    if (!seq || Object.keys(ocrData).length === 0) { alert('저장할 내용이 없습니다.'); return; }
+    try {
+        var res = await fetch('/api/save', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ seq: seq, formid: formid, ocrData: ocrData, editedFields: dirtyFields })
+        });
+        var data = await res.json();
+        if (data.resultCode === '200') {
+            Object.assign(userEdits, dirtyFields);
+            dirtyFields = {};
+            alert('저장되었습니다. (보호 필드 ' + (data.protectedFields || 0) + '개)');
+        } else {
+            alert('저장 실패: ' + data.resultMsg);
+        }
+    } catch (e) { alert('저장 실패: ' + e.message); }
 }
 
 function clearOverlays() {
