@@ -15,7 +15,7 @@ function fillForm(ocrResult) {
         var n = r < 10 ? '0' + r : '' + r;
         textFields.push('MA_SO.' + n, 'HO_TEN.' + n, 'GHI_CHU.' + n);
         for (var c = 1; c <= 6; c++) {
-            textFields.push('D' + c + '.' + n);
+            textFields.push(r + '_' + c);   // 날짜 그리드: 행_열 (DigiDox 등록 체계)
         }
     }
 
