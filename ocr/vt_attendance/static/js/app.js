@@ -11,7 +11,7 @@ function fillForm(ocrResult) {
         textFields.push('DATE.' + (c < 10 ? '0' + c : '' + c));
     }
 
-    for (var r = 1; r <= 40; r++) {
+    for (var r = 1; r <= 6; r++) {   // PoC: 상단 6행만 등록됨
         var n = r < 10 ? '0' + r : '' + r;
         textFields.push('MA_SO.' + n, 'HO_TEN.' + n, 'GHI_CHU.' + n);
         for (var c = 1; c <= 6; c++) {
