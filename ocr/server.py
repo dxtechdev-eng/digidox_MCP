@@ -368,17 +368,20 @@ def _extract_json(text: str) -> dict:
 
 
 def ocr_full_form(page_image: str, formid: str, writable_fields: dict,
-                  engine: str, api_url: str, api_key: str, model: str) -> dict:
-    """1페이지 전체 이미지를 한 번에 OCR → 필드ID 키 JSON 반환"""
+                  engine: str, api_url: str, api_key: str, model: str, user_prompt: str = "") -> dict:
+    """1페이지 전체 이미지를 한 번에 OCR → 필드ID 키 JSON 반환
+    user_prompt: DigiDox promptInfo JSON의 "prompt" (양식 설명·읽기 지시). 비어 있으면 VN_FORM_DESC 기본값 사용.
+    출력 스키마(필드 키 JSON / 출근부 행 구조)는 서버가 항상 뒤에 붙임."""
     ordered = sorted(writable_fields.items(), key=lambda kv: ((kv[1].get("top") or 0), (kv[1].get("left") or 0)))
     field_ids = [fid for fid, _ in ordered]
     prefix = next((p for p in VN_FORM_DESC if formid and formid.startswith(p)), None)
 
+    desc = (user_prompt or "").strip() or VN_FORM_DESC.get(prefix, "Handwritten form.")
+
     if prefix == "HANSE_ATTENDANCE":
-        prompt = ("This is a Vietnamese factory attendance sheet (BANG CHAM CONG TAY). "
+        prompt = (f"{desc}\n"
                   "For the FIRST 6 worker rows from the top, read the printed worker ID (MA SO) and the "
-                  "handwritten marks in the 6 date columns, left to right. "
-                  "Marks are one of: X, Vang, TV, Nghi viec, or empty (\"\"). Printed text is not a mark. "
+                  "handwritten marks in the 6 date columns, left to right. Printed text is not a mark. "
                   "Return JSON only: {\"rows\":[{\"MA_SO\":\"\",\"days\":[\"\",\"\",\"\",\"\",\"\",\"\"]}]}")
         raw = _extract_json(run_ocr_engine([page_image], prompt, engine, api_url, api_key, model))
         result = {}
@@ -389,7 +392,6 @@ def ocr_full_form(page_image: str, formid: str, writable_fields: dict,
                 if fid in writable_fields:
                     result[fid] = str(days[ci]).strip() if ci < len(days) and days[ci] is not None else ""
     else:
-        desc = VN_FORM_DESC.get(prefix, "Handwritten form.")
         hints = ",".join(f'"{f}": ""' for f in field_ids)
         prompt = (f"{desc}\nRead ONLY the handwritten entries. Printed text is not a value. "
                   "If a cell is empty return \"\". Return JSON only, no explanation, with exactly these keys:\n"
@@ -654,12 +656,13 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
             and fid not in ["S.PAGE_NO", "S.SEQ", "S.QRCODE"]
         }
 
-        if writable_fields and not prompt_from_settings and engine == "ollama":
-            # 로컬 Qwen: 전체 이미지 + 양식별 프롬프트 (셀 배치는 순서 밀림으로 부정확)
-            logger.info(f"전체 이미지(양식 프롬프트) OCR: {len(writable_fields)}개 필드, engine={engine}")
+        if writable_fields and engine == "ollama":
+            # 로컬 Qwen: 전체 이미지 + promptInfo의 prompt(없으면 양식별 기본 설명) + 서버가 붙이는 출력 스키마
+            # (셀 배치 방식은 Qwen에서 이미지 순서가 밀려 부정확)
+            logger.info(f"전체 이미지 OCR: {len(writable_fields)}개 필드, engine={engine}, 사용자 프롬프트={'있음' if prompt_from_settings else '없음(기본값)'}")
             images = pdf_to_images(pdf_bytes)
             page_count = len(images)
-            ocr_result = ocr_full_form(images[0], formid, writable_fields, engine, api_url, api_key, model)
+            ocr_result = ocr_full_form(images[0], formid, writable_fields, engine, api_url, api_key, model, prompt_from_settings)
             ocr_text = json.dumps(ocr_result, ensure_ascii=False)
         elif writable_fields and not prompt_from_settings:
             # 셀 단위 OCR (promptInfo에 전용 프롬프트가 없을 때)
