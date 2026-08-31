@@ -617,13 +617,13 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
 
         engine = (ocr_settings.get("engine") or "openai").strip().lower()
         engine = {"gpt": "openai", "claude": "anthropic", "local": "ollama", "qwen": "ollama"}.get(engine, engine)
+        api_url = ocr_settings.get("api_url") or "https://api.openai.com"
+        api_key = ocr_settings.get("api_key") or ""
+        model = ocr_settings.get("model") or "gpt-4o"
         if engine == "ollama" and (not api_url or "openai.com" in api_url):
             # promptInfo에 apiUrl이 없으면 config [ollama] remote_url 사용
             api_url = config.OLLAMA_REMOTE_URL
             logger.info(f"ollama apiUrl 미지정 — config 기본값 사용: {api_url}")
-        api_url = ocr_settings.get("api_url") or "https://api.openai.com"
-        api_key = ocr_settings.get("api_key") or ""
-        model = ocr_settings.get("model") or "gpt-4o"
 
         # PoC formid면 config의 API 키를 fallback으로 사용 (OpenAI 엔진일 때만 — ollama 모델명을 덮어쓰지 않도록)
         if is_poc_form(formid) and not api_key and engine == "openai":
