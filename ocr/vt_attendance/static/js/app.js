@@ -7,7 +7,7 @@ function fillForm(ocrResult) {
 
     for (var r = 1; r <= 6; r++) {
         for (var c = 0; c < 6; c++) {
-            var id = 'ABCDEF'[c] + '_' + r;
+            var id = 'ABCDEF'[r - 1] + '_' + (c + 1);   // 행문자_열번호 (DigiDox 등록 체계)
             var el = document.getElementById(id);
             if (el && data[id] !== undefined) el.value = data[id];
         }
