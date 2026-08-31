@@ -602,6 +602,8 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
                                 "model": pi.get("model", "gpt-5.6-terra"),
                             }
                             prompt_from_settings = pi.get("prompt", "")
+                            if prompt_from_settings:
+                                logger.info(f"promptInfo prompt(앞 120자): {prompt_from_settings[:120]}")
                             logger.info(f"promptInfo JSON에서 OCR 설정 추출: engine={ocr_settings['engine']}, model={ocr_settings['model']}, apiKey={'있음' if ocr_settings['api_key'] else '없음'}")
                     except (json.JSONDecodeError, TypeError):
                         pass
