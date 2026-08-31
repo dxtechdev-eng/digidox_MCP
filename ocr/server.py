@@ -338,6 +338,71 @@ Images correspond to {json.dumps(batch_ids)} in order.
     return results
 
 
+# ============================================================
+# 전체 이미지 + 양식별 프롬프트 OCR (로컬 Qwen/ollama 경로)
+#  - 셀 배치(10장/요청) 방식은 Qwen에서 이미지 순서가 밀려 정확도 21~40%로 붕괴 (2026-08-31 검증)
+#  - 벤치마크에서 검증된 전체 이미지 방식(출근부 100%, 생산량표 96%)을 그대로 사용
+# ============================================================
+
+VN_FORM_DESC = {
+    "HANSE_ATTENDANCE": ("Vietnamese factory attendance sheet (BANG CHAM CONG TAY). "
+                         "6 worker rows x 6 date columns. Handwritten marks are one of: X, Vang, TV, Nghi viec, or empty."),
+    "HANSE_NUMBERING": ("Vietnamese production log (BANG SAN LUONG PHOI HANG + DAN TEM + DANH SO), landscape. "
+                        "Header: WORKER_NAME (TEN CN), WORKER_NUM (MA SO CN), DATE (NGAY). "
+                        "Rows with columns: PRODUCT_CODE (MA HANG), FILE_NUM (SO FILE), TYPE (LOAI VAI), TABLE (SO BAN), "
+                        "COLOR (MAU), MARKRATE (TI LE SO DO), SET (SO BO/BO), LAYER (SO LOP), MEMO (GHI CHU); "
+                        "field id = <COLUMN><row>, e.g. PRODUCT_CODE1, MEMO3."),
+    "HANSE_SUPERMARKET": ("Vietnamese fabric warehouse (supermarket) issue slip. "
+                          "Header: CARD_NUM (SO THE), NAME (TEN), DATE (NGAY). "
+                          "Rows with columns: PRODUCT_CODE (MA HANG), TYPE (LOAI VAI), FILE_NUM (SO FILE), COLOR (MAU), "
+                          "NUMBER (SO LUONG), LAYER (SO LOP), SIZE (SIZE); field id = <COLUMN><row>, e.g. PRODUCT_CODE1."),
+}
+
+
+def _extract_json(text: str) -> dict:
+    m = re.search(r"```(?:json)?\s*([\s\S]*?)```", text)
+    if m:
+        text = m.group(1)
+    m = re.search(r"\{[\s\S]*\}", text)
+    return json.loads(m.group()) if m else {}
+
+
+def ocr_full_form(page_image: str, formid: str, writable_fields: dict,
+                  engine: str, api_url: str, api_key: str, model: str) -> dict:
+    """1페이지 전체 이미지를 한 번에 OCR → 필드ID 키 JSON 반환"""
+    ordered = sorted(writable_fields.items(), key=lambda kv: ((kv[1].get("top") or 0), (kv[1].get("left") or 0)))
+    field_ids = [fid for fid, _ in ordered]
+    prefix = next((p for p in VN_FORM_DESC if formid and formid.startswith(p)), None)
+
+    if prefix == "HANSE_ATTENDANCE":
+        prompt = ("This is a Vietnamese factory attendance sheet (BANG CHAM CONG TAY). "
+                  "For the FIRST 6 worker rows from the top, read the printed worker ID (MA SO) and the "
+                  "handwritten marks in the 6 date columns, left to right. "
+                  "Marks are one of: X, Vang, TV, Nghi viec, or empty (\"\"). Printed text is not a mark. "
+                  "Return JSON only: {\"rows\":[{\"MA_SO\":\"\",\"days\":[\"\",\"\",\"\",\"\",\"\",\"\"]}]}")
+        raw = _extract_json(run_ocr_engine([page_image], prompt, engine, api_url, api_key, model))
+        result = {}
+        for ri, row in enumerate(raw.get("rows", [])[:6]):
+            days = row.get("days", []) if isinstance(row, dict) else []
+            for ci in range(6):
+                fid = f"{'ABCDEF'[ri]}_{ci + 1}"
+                if fid in writable_fields:
+                    result[fid] = str(days[ci]).strip() if ci < len(days) and days[ci] is not None else ""
+    else:
+        desc = VN_FORM_DESC.get(prefix, "Handwritten form.")
+        hints = ",".join(f'"{f}": ""' for f in field_ids)
+        prompt = (f"{desc}\nRead ONLY the handwritten entries. Printed text is not a value. "
+                  "If a cell is empty return \"\". Return JSON only, no explanation, with exactly these keys:\n"
+                  f"{{{hints}}}")
+        raw = _extract_json(run_ocr_engine([page_image], prompt, engine, api_url, api_key, model))
+        result = {fid: (str(raw.get(fid, "")).strip() if raw.get(fid) is not None else "") for fid in field_ids}
+
+    for fid in field_ids:
+        result.setdefault(fid, "")
+    logger.info(f"전체 이미지 OCR 완료: formid={formid}, 필드 {len(result)}개")
+    return result
+
+
 
 
 # ============================================================
@@ -589,7 +654,14 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
             and fid not in ["S.PAGE_NO", "S.SEQ", "S.QRCODE"]
         }
 
-        if writable_fields and not prompt_from_settings:
+        if writable_fields and not prompt_from_settings and engine == "ollama":
+            # 로컬 Qwen: 전체 이미지 + 양식별 프롬프트 (셀 배치는 순서 밀림으로 부정확)
+            logger.info(f"전체 이미지(양식 프롬프트) OCR: {len(writable_fields)}개 필드, engine={engine}")
+            images = pdf_to_images(pdf_bytes)
+            page_count = len(images)
+            ocr_result = ocr_full_form(images[0], formid, writable_fields, engine, api_url, api_key, model)
+            ocr_text = json.dumps(ocr_result, ensure_ascii=False)
+        elif writable_fields and not prompt_from_settings:
             # 셀 단위 OCR (promptInfo에 전용 프롬프트가 없을 때)
             logger.info(f"셀 단위 OCR: {len(writable_fields)}개 필드")
             img = pdf_to_pil_image(pdf_bytes, 0)
