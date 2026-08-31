@@ -344,21 +344,8 @@ Images correspond to {json.dumps(batch_ids)} in order.
 #  - 벤치마크에서 검증된 전체 이미지 방식(출근부 100%, 생산량표 96%)을 그대로 사용
 # ============================================================
 
-VN_FORM_DESC = {
-    "HANSE_ATTENDANCE": ("Vietnamese factory attendance sheet (BẢNG CHẤM CÔNG TAY) with handwritten marks. "
-                         "6 worker rows x 6 date columns. Marks are one of: X, Vắng, TV, 1/2, Phép, Ốm, CT, Trễ, "
-                         "Nghỉ việc, or empty. Keep Vietnamese diacritics exactly as written."),
-    "HANSE_NUMBERING": ("Vietnamese production log (BẢNG SẢN LƯỢNG PHỐI HÀNG + DÁN TEM + ĐÁNH SỐ), landscape, handwritten entries. "
-                        "Header: WORKER_NAME (TÊN CN), WORKER_NUM (MÃ SỐ CN), DATE (NGÀY). "
-                        "Rows with columns: PRODUCT_CODE (MÃ HÀNG), FILE_NUM (SỐ FILE), TYPE (LOẠI VẢI), TABLE (SỐ BÀN), "
-                        "COLOR (MÀU), MARKRATE (TỈ LỆ SƠ ĐỒ), SET (SỐ BÓ/BỘ), LAYER (SỐ LỚP), MEMO (GHI CHÚ); "
-                        "field id = <COLUMN><row>, e.g. PRODUCT_CODE1, MEMO3. Keep Vietnamese diacritics exactly as written."),
-    "HANSE_SUPERMARKET": ("Vietnamese fabric warehouse issue slip (PHỐI HÀNG SIÊU THỊ), handwritten entries. "
-                          "Header: CARD_NUM (MÃ SỐ THẺ), NAME (HỌ VÀ TÊN), DATE (NGÀY). "
-                          "Rows with columns: PRODUCT_CODE (MÃ HÀNG), TYPE (LOẠI VẢI), FILE_NUM (SỐ FILE), COLOR (MÀU), "
-                          "NUMBER (SỐ THỨ TỰ BÓ), LAYER (SỐ LỚP/BÓ), SIZE (SỐ SIZE/XE); field id = <COLUMN><row>, e.g. PRODUCT_CODE1. "
-                          "Keep Vietnamese diacritics exactly as written."),
-}
+# 양식 설명·어휘 프롬프트는 DigiDox promptInfo의 "prompt"에서만 관리 (서버 하드코딩 없음)
+# 서버는 출력 스키마(필드ID 키 JSON / 출근부 행 구조→A_1~F_6 매핑)만 부착
 
 
 def _extract_json(text: str) -> dict:
@@ -372,15 +359,15 @@ def _extract_json(text: str) -> dict:
 def ocr_full_form(page_image: str, formid: str, writable_fields: dict,
                   engine: str, api_url: str, api_key: str, model: str, user_prompt: str = "") -> dict:
     """1페이지 전체 이미지를 한 번에 OCR → 필드ID 키 JSON 반환
-    user_prompt: DigiDox promptInfo JSON의 "prompt" (양식 설명·읽기 지시). 비어 있으면 VN_FORM_DESC 기본값 사용.
+    user_prompt: DigiDox promptInfo JSON의 "prompt" (양식 설명·읽기 지시). 필수.
     출력 스키마(필드 키 JSON / 출근부 행 구조)는 서버가 항상 뒤에 붙임."""
     ordered = sorted(writable_fields.items(), key=lambda kv: ((kv[1].get("top") or 0), (kv[1].get("left") or 0)))
     field_ids = [fid for fid, _ in ordered]
-    prefix = next((p for p in VN_FORM_DESC if formid and formid.startswith(p)), None)
+    desc = (user_prompt or "").strip()
+    if not desc:
+        raise ValueError("promptInfo에 prompt가 없습니다. DigiDox 폼 설정의 promptInfo JSON에 \"prompt\"를 입력하세요.")
 
-    desc = (user_prompt or "").strip() or VN_FORM_DESC.get(prefix, "Handwritten form.")
-
-    if prefix == "HANSE_ATTENDANCE":
+    if formid and formid.startswith("HANSE_ATTENDANCE"):
         prompt = (f"{desc}\n"
                   "For the FIRST 6 worker rows from the top, read the printed worker ID (MA SO) and the "
                   "handwritten marks in the 6 date columns, left to right. Printed text is not a mark. "
@@ -667,9 +654,9 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
         }
 
         if writable_fields and engine == "ollama":
-            # 로컬 Qwen: 전체 이미지 + promptInfo의 prompt(없으면 양식별 기본 설명) + 서버가 붙이는 출력 스키마
+            # 로컬 Qwen: 전체 이미지 + promptInfo의 prompt(필수) + 서버가 붙이는 출력 스키마
             # (셀 배치 방식은 Qwen에서 이미지 순서가 밀려 부정확)
-            logger.info(f"전체 이미지 OCR: {len(writable_fields)}개 필드, engine={engine}, 사용자 프롬프트={'있음' if prompt_from_settings else '없음(기본값)'}")
+            logger.info(f"전체 이미지 OCR: {len(writable_fields)}개 필드, engine={engine}, prompt={'있음' if prompt_from_settings else '없음'}")
             images = pdf_to_images(pdf_bytes)
             page_count = len(images)
             ocr_result = ocr_full_form(images[0], formid, writable_fields, engine, api_url, api_key, model, prompt_from_settings)
