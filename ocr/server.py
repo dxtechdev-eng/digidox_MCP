@@ -346,7 +346,8 @@ Images correspond to {json.dumps(batch_ids)} in order.
 
 VN_FORM_DESC = {
     "HANSE_ATTENDANCE": ("Vietnamese factory attendance sheet (BANG CHAM CONG TAY). "
-                         "6 worker rows x 6 date columns. Handwritten marks are one of: X, Vang, TV, Nghi viec, or empty."),
+                         "6 worker rows x 6 date columns. Handwritten marks are one of: X, Vang, TV, 1/2, Phep, Om, CT, Tre, "
+                         "Nghi viec, or empty. Keep Vietnamese diacritics as written."),
     "HANSE_NUMBERING": ("Vietnamese production log (BANG SAN LUONG PHOI HANG + DAN TEM + DANH SO), landscape. "
                         "Header: WORKER_NAME (TEN CN), WORKER_NUM (MA SO CN), DATE (NGAY). "
                         "Rows with columns: PRODUCT_CODE (MA HANG), FILE_NUM (SO FILE), TYPE (LOAI VAI), TABLE (SO BAN), "
