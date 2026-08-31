@@ -591,7 +591,8 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
                     try:
                         pi = json.loads(prompt_info_raw)
                         if isinstance(pi, dict) and "apiKey" in pi:
-                            engine_map = {"gpt": "openai", "openai": "openai", "anthropic": "anthropic", "ollama": "ollama"}
+                            engine_map = {"gpt": "openai", "openai": "openai", "anthropic": "anthropic", "claude": "anthropic",
+                                          "ollama": "ollama", "local": "ollama", "qwen": "ollama"}
                             ocr_settings = {
                                 "engine": engine_map.get(pi.get("ocrType", ""), pi.get("ocrType", "openai")),
                                 "api_url": pi.get("apiUrl", "https://api.openai.com"),
@@ -614,7 +615,8 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
             except Exception as e:
                 logger.warning(f"폼 정보 조회 실패: {e}")
 
-        engine = ocr_settings.get("engine") or "openai"
+        engine = (ocr_settings.get("engine") or "openai").strip().lower()
+        engine = {"gpt": "openai", "claude": "anthropic", "local": "ollama", "qwen": "ollama"}.get(engine, engine)
         api_url = ocr_settings.get("api_url") or "https://api.openai.com"
         api_key = ocr_settings.get("api_key") or ""
         model = ocr_settings.get("model") or "gpt-4o"
