@@ -550,8 +550,8 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
         api_key = ocr_settings.get("api_key") or ""
         model = ocr_settings.get("model") or "gpt-4o"
 
-        # PoC formid면 config의 API 키를 fallback으로 사용
-        if is_poc_form(formid) and not api_key:
+        # PoC formid면 config의 API 키를 fallback으로 사용 (OpenAI 엔진일 때만 — ollama 모델명을 덮어쓰지 않도록)
+        if is_poc_form(formid) and not api_key and engine == "openai":
             api_key = config.OPENAI_API_KEY
             model = config.OPENAI_MODEL
             logger.info(f"PoC formid 감지 — config API 키 사용")
