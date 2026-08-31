@@ -67,8 +67,8 @@ FORMID_TEMPLATE_MAP = {
     "ITSUWA": "itsuwa",
     "DEMO_SHEET_VT": "demosheet_vt",
     "HANSE_ATTENDANCE": "vt_attendance",
-    "HANSE_NUMBERING": "overlay",
-    "HANSE_SUPERMARKET": "overlay",
+    "HANSE_NUMBERING": "vt_numbering",
+    "HANSE_SUPERMARKET": "vt_supermarket",
 }
 
 # PoC formid 목록 (API 키 fallback 대상)
@@ -617,6 +617,10 @@ async def api_ocr(seq: str = None, formid: str = None, force: bool = False, key:
 
         engine = (ocr_settings.get("engine") or "openai").strip().lower()
         engine = {"gpt": "openai", "claude": "anthropic", "local": "ollama", "qwen": "ollama"}.get(engine, engine)
+        if engine == "ollama" and (not api_url or "openai.com" in api_url):
+            # promptInfo에 apiUrl이 없으면 config [ollama] remote_url 사용
+            api_url = config.OLLAMA_REMOTE_URL
+            logger.info(f"ollama apiUrl 미지정 — config 기본값 사용: {api_url}")
         api_url = ocr_settings.get("api_url") or "https://api.openai.com"
         api_key = ocr_settings.get("api_key") or ""
         model = ocr_settings.get("model") or "gpt-4o"
