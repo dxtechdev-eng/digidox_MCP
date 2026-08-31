@@ -262,6 +262,8 @@ def ocr_with_ollama(images: list[str], prompt: str, api_url: str, model: str) ->
         "model": model,
         "messages": [{"role": "user", "content": prompt, "images": images}],
         "stream": False,
+        "think": False,                                   # qwen3 계열 사고모드 비활성 (속도·출력 안정)
+        "options": {"temperature": 0, "num_predict": 8192},
     }
     response = httpx.post(url, json=payload, timeout=None)
     response.raise_for_status()
