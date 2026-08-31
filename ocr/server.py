@@ -345,18 +345,19 @@ Images correspond to {json.dumps(batch_ids)} in order.
 # ============================================================
 
 VN_FORM_DESC = {
-    "HANSE_ATTENDANCE": ("Vietnamese factory attendance sheet (BANG CHAM CONG TAY). "
-                         "6 worker rows x 6 date columns. Handwritten marks are one of: X, Vang, TV, 1/2, Phep, Om, CT, Tre, "
-                         "Nghi viec, or empty. Keep Vietnamese diacritics as written."),
-    "HANSE_NUMBERING": ("Vietnamese production log (BANG SAN LUONG PHOI HANG + DAN TEM + DANH SO), landscape. "
-                        "Header: WORKER_NAME (TEN CN), WORKER_NUM (MA SO CN), DATE (NGAY). "
-                        "Rows with columns: PRODUCT_CODE (MA HANG), FILE_NUM (SO FILE), TYPE (LOAI VAI), TABLE (SO BAN), "
-                        "COLOR (MAU), MARKRATE (TI LE SO DO), SET (SO BO/BO), LAYER (SO LOP), MEMO (GHI CHU); "
-                        "field id = <COLUMN><row>, e.g. PRODUCT_CODE1, MEMO3."),
-    "HANSE_SUPERMARKET": ("Vietnamese fabric warehouse (supermarket) issue slip. "
-                          "Header: CARD_NUM (SO THE), NAME (TEN), DATE (NGAY). "
-                          "Rows with columns: PRODUCT_CODE (MA HANG), TYPE (LOAI VAI), FILE_NUM (SO FILE), COLOR (MAU), "
-                          "NUMBER (SO LUONG), LAYER (SO LOP), SIZE (SIZE); field id = <COLUMN><row>, e.g. PRODUCT_CODE1."),
+    "HANSE_ATTENDANCE": ("Vietnamese factory attendance sheet (BẢNG CHẤM CÔNG TAY) with handwritten marks. "
+                         "6 worker rows x 6 date columns. Marks are one of: X, Vắng, TV, 1/2, Phép, Ốm, CT, Trễ, "
+                         "Nghỉ việc, or empty. Keep Vietnamese diacritics exactly as written."),
+    "HANSE_NUMBERING": ("Vietnamese production log (BẢNG SẢN LƯỢNG PHỐI HÀNG + DÁN TEM + ĐÁNH SỐ), landscape, handwritten entries. "
+                        "Header: WORKER_NAME (TÊN CN), WORKER_NUM (MÃ SỐ CN), DATE (NGÀY). "
+                        "Rows with columns: PRODUCT_CODE (MÃ HÀNG), FILE_NUM (SỐ FILE), TYPE (LOẠI VẢI), TABLE (SỐ BÀN), "
+                        "COLOR (MÀU), MARKRATE (TỈ LỆ SƠ ĐỒ), SET (SỐ BÓ/BỘ), LAYER (SỐ LỚP), MEMO (GHI CHÚ); "
+                        "field id = <COLUMN><row>, e.g. PRODUCT_CODE1, MEMO3. Keep Vietnamese diacritics exactly as written."),
+    "HANSE_SUPERMARKET": ("Vietnamese fabric warehouse issue slip (PHỐI HÀNG SIÊU THỊ), handwritten entries. "
+                          "Header: CARD_NUM (MÃ SỐ THẺ), NAME (HỌ VÀ TÊN), DATE (NGÀY). "
+                          "Rows with columns: PRODUCT_CODE (MÃ HÀNG), TYPE (LOẠI VẢI), FILE_NUM (SỐ FILE), COLOR (MÀU), "
+                          "NUMBER (SỐ THỨ TỰ BÓ), LAYER (SỐ LỚP/BÓ), SIZE (SỐ SIZE/XE); field id = <COLUMN><row>, e.g. PRODUCT_CODE1. "
+                          "Keep Vietnamese diacritics exactly as written."),
 }
 
 
